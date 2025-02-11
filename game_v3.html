@@ -281,8 +281,8 @@
             constructor() {
             this.canvas = document.getElementById('gameCanvas');
             this.ctx = this.canvas.getContext('2d');
-            this.canvas.width = 800;
-            this.canvas.height = 600;
+           // this.canvas.width = 800;
+            //this.canvas.height = 600;
 
             this.playerSize = 20;
             this.ghostSize = 20;
@@ -294,16 +294,29 @@
             this.reviveBonus = null;
             this.gameTime = 0;
 
-            this.player1 = { x: 100, y: 100, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "yellow", alive: true };
-            this.player2 = { x: 700, y: 500, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "blue", alive: true };
+            this.resizeCanvas(); // Resize on load
+        window.addEventListener('resize', () => this.resizeCanvas()); // Resize on window change
 
-            this.redGhosts = Array.from({ length: 2 }, () => this.createGhost("red"));
-            this.whiteGhosts = Array.from({ length: 2 }, () => this.createGhost("white"));
+        this.playerSize = Math.min(this.canvas.width, this.canvas.height) * 0.05; // 5% of smaller dimension
+        this.ghostSize = this.playerSize;
+        this.speed = this.canvas.width * 0.005; // Adjust speed based on screen size
+
+        this.player1 = { x: 100, y: 100, width: this.playerSize, height: this.playerSize, color: "yellow", alive: true };
+        this.player2 = { x: 700, y: 500, width: this.playerSize, height: this.playerSize, color: "blue", alive: true };
 
             this.keys = {};
             document.addEventListener("keydown", (e) => this.keys[e.key] = true);
             document.addEventListener("keyup", (e) => this.keys[e.key] = false);
             }
+
+            resizeCanvas() {
+        this.canvas.width = window.innerWidth * 0.9; // 90% of screen width
+        this.canvas.height = window.innerHeight * 0.7; // 70% of screen height
+
+        this.playerSize = Math.min(this.canvas.width, this.canvas.height) * 0.05;
+        this.ghostSize = this.playerSize;
+        this.speed = this.canvas.width * 0.005;
+    }
 
             createGhost(color) {
             return {
