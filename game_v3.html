@@ -110,6 +110,10 @@
             display: none; /* Hide the container by default */
         }
 
+        #game-over-screen {
+            background-image: url('images/game-over.webp');
+        }
+
         #game-screen.active #game-container {
             display: block; /* Show the container when the game screen is active */
         }
@@ -117,9 +121,13 @@
         canvas {
             display: block;
             background-color: #111;
-            width: 100%; /* Ensure the canvas fills the container */
+            background-image: url('images/game-background.jpeg'); /* Corrected */
+            background-size: cover; /* Cover the entire canvas */
+            background-position: center; /* Center the image */
+            width: 100%;
             height: 100%;
         }
+
         #instructions-screen {
             z-index: 200;
         }
@@ -310,13 +318,14 @@
             }
 
             resizeCanvas() {
-        this.canvas.width = window.innerWidth * 0.9; // 90% of screen width
-        this.canvas.height = window.innerHeight * 0.7; // 70% of screen height
+                this.canvas.width = window.innerWidth * 0.9; // 90% of screen width
+                this.canvas.height = window.innerHeight * 0.7; // 70% of screen height
 
-        this.playerSize = Math.min(this.canvas.width, this.canvas.height) * 0.05;
-        this.ghostSize = this.playerSize;
-        this.speed = this.canvas.width * 0.005;
-    }
+                this.playerSize = Math.min(this.canvas.width, this.canvas.height) * 0.05;
+                this.ghostSize = this.playerSize;
+                this.speed = this.canvas.width * 0.005;
+
+            }
 
             createGhost(color) {
             return {
