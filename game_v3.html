@@ -33,9 +33,6 @@
             max-width: 600px;
             width: 90%;
         }
-        .game-score {
-            text-align: center;
-        }
         button {
             background: linear-gradient(135deg, #283c86 0%, #45a247 100%);
             border: 2px solid #fff;
@@ -100,19 +97,38 @@
 
         #game-container {
             position: relative;
-            width: 800px; /* Fixed width for the game container */
-            height: 600px; /* Fixed height for the game container */
+            width: 90vw; /* Adjust width dynamically based on viewport width */
+            max-width: 800px; /* Maximum width for larger screens */
+            height: 70vh; /* Adjust height dynamically based on viewport height */
+            max-height: 600px; /* Maximum height for larger screens */
             overflow: hidden;
-            background-color: #0f3460;
             border: 2px solid #e94560;
             box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
-            margin: 0 auto; /* Center the container horizontally */
-            display: none; /* Hide the container by default */
+            margin: 0 auto; /* Center the container */
+            display: none;
         }
 
-        #game-over-screen {
-            background-image: url('images/game-over.webp');
+        #background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("/assets/ruins.jpg") no-repeat center center;
+            background-size: cover;
+            z-index: 0;
         }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75); /* Transparent overlay */
+            z-index: 1; /* Still below the canvas */
+        }
+
 
         #game-screen.active #game-container {
             display: block; /* Show the container when the game screen is active */
@@ -120,14 +136,12 @@
 
         canvas {
             display: block;
-            background-color: #111;
-            background-image: url('images/game-background.jpeg'); /* Corrected */
-            background-size: cover; /* Cover the entire canvas */
-            background-position: center; /* Center the image */
-            width: 100%;
+            position: absolute;
+            background-color: transparent;
+            width: 100%; /* Ensure the canvas fills the container */
             height: 100%;
+            z-index: 2;
         }
-
         #instructions-screen {
             z-index: 200;
         }
@@ -161,12 +175,7 @@
       <button id="game-restart-button">Restart</button>
       <button id="game-instructions-button">Instructions</button>
     </div>
-    <div id="hud">
-        <div class="game-score">
-            <span>Score: <span id="score">0</span>
-            <span>High Score: <span id="high-score">0</span>
-        </div>
-    </div>
+    <div id="hud"></div>
 
     <div id="start-menu-screen" class="active screen">
       <div class="container">
@@ -204,6 +213,8 @@
 
     <div id="game-screen" class="screen">
         <div id="game-container">
+            <div id="background"></div>
+            <div id="overlay"></div> <!-- New overlay for transparency -->
             <canvas id="gameCanvas"></canvas>
         </div>
     </div>
@@ -235,7 +246,6 @@
             this.gameControls = document.getElementById('game-controls');
             this.hud = document.getElementById('hud');
             this.scoreDisplay = document.getElementById('score');
-            this.highScoreDisplay = document.getElementById('high-score');
             }
 
             swapToScreen(screen) {
@@ -283,14 +293,19 @@
             instructions() {
             this.swapToScreen(this.instructionsScreen);
             }
+
+            updateScore(score) {
+            this.scoreDisplay.textContent = score;
+            }
         }
 
         class GameLogic {
             constructor() {
             this.canvas = document.getElementById('gameCanvas');
             this.ctx = this.canvas.getContext('2d');
-           // this.canvas.width = 800;
-            //this.canvas.height = 600;
+            
+            // Set canvas size dynamically
+            this.resizeCanvas();
 
             this.playerSize = 20;
             this.ghostSize = 20;
@@ -302,29 +317,23 @@
             this.reviveBonus = null;
             this.gameTime = 0;
 
-            this.resizeCanvas(); // Resize on load
-        window.addEventListener('resize', () => this.resizeCanvas()); // Resize on window change
+            this.player1 = { x: 100, y: 100, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "yellow", alive: true };
+            this.player2 = { x: 700, y: 500, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "blue", alive: true };
 
-        this.playerSize = Math.min(this.canvas.width, this.canvas.height) * 0.05; // 5% of smaller dimension
-        this.ghostSize = this.playerSize;
-        this.speed = this.canvas.width * 0.005; // Adjust speed based on screen size
-
-        this.player1 = { x: 100, y: 100, width: this.playerSize, height: this.playerSize, color: "yellow", alive: true };
-        this.player2 = { x: 700, y: 500, width: this.playerSize, height: this.playerSize, color: "blue", alive: true };
+            this.redGhosts = Array.from({ length: 2 }, () => this.createGhost("red"));
+            this.whiteGhosts = Array.from({ length: 2 }, () => this.createGhost("white"));
 
             this.keys = {};
             document.addEventListener("keydown", (e) => this.keys[e.key] = true);
             document.addEventListener("keyup", (e) => this.keys[e.key] = false);
+
+            // Handle screen resizing
+            window.addEventListener("resize", () => this.resizeCanvas());
             }
 
             resizeCanvas() {
-                this.canvas.width = window.innerWidth * 0.9; // 90% of screen width
-                this.canvas.height = window.innerHeight * 0.7; // 70% of screen height
-
-                this.playerSize = Math.min(this.canvas.width, this.canvas.height) * 0.05;
-                this.ghostSize = this.playerSize;
-                this.speed = this.canvas.width * 0.005;
-
+            this.canvas.width = Math.min(window.innerWidth * 0.9, 800);
+            this.canvas.height = Math.min(window.innerHeight * 0.7, 600);
             }
 
             createGhost(color) {
@@ -425,8 +434,6 @@
             this.gameTime = 0;
             this.player1.alive = true;
             this.player2.alive = true;
-            this.speed = 3;
-            this.initialGhostSpeed = 2;
             this.redGhosts = Array.from({ length: 2 }, () => this.createGhost("red"));
             this.whiteGhosts = Array.from({ length: 2 }, () => this.createGhost("white"));
             this.reviveBonus = null;
@@ -479,7 +486,7 @@
             }
 
             this.logic.gameTime++;
-            this.updateScore(this.logic.score++);
+            // this.ui.updateScore(this.logic.score++);
 
             if (this.logic.gameOver) {
                 this.ui.endGame();
@@ -487,21 +494,9 @@
             }
             }
 
-            updateScore(score) {
-                let highScore = parseInt(localStorage.getItem('highScore')) || 0;
-                this.ui.scoreDisplay.textContent = score;
-                if (score > highScore) {
-                    highScore = score;
-                }
-                this.ui.highScoreDisplay.textContent = highScore;
-                localStorage.setItem('highScore', highScore); 
-            }
-
             resetGame() {
             this.logic = new GameLogic(); // Reinitialize GameLogic on reset
             this.isPaused = false;
-            this.speed = 3;
-            this.initialGhostSpeed = 2;
             cancelAnimationFrame(this.animationFrameId);
             }
 
@@ -536,39 +531,39 @@
             }
 
             assignButtons() {
-                const playButton = document.getElementById('play-button');
-                const settingsButton = document.getElementById('settings-button');
-                const instructionsButton = document.getElementById('instructions-button');
-                const playAgainButton = document.getElementById('play-again-button');
-                const mainMenuButtons = document.querySelectorAll('#main-menu-button, #settings-back-button, #instructions-back-button');
-                const gameMenuButton = document.getElementById('game-menu-button');
-                const gameRestartButton = document.getElementById('game-restart-button');
-                const gameInstructionsButton = document.getElementById('game-instructions-button');
+            const playButton = document.getElementById('play-button');
+            const settingsButton = document.getElementById('settings-button');
+            const instructionsButton = document.getElementById('instructions-button');
+            const playAgainButton = document.getElementById('play-again-button');
+            const mainMenuButtons = document.querySelectorAll('#game-over-main-menu-button, #settings-back-button, #instructions-back-button');
+            const gameMenuButton = document.getElementById('game-menu-button');
+            const gameRestartButton = document.getElementById('game-restart-button');
+            const gameInstructionsButton = document.getElementById('game-instructions-button');
 
-                playButton.addEventListener('click', this.startGame.bind(this));
-                settingsButton.addEventListener('click', this.ui.settings.bind(this.ui));
-                instructionsButton.addEventListener('click', this.ui.instructions.bind(this.ui));
-                playAgainButton.addEventListener('click', this.startGame.bind(this));
-                mainMenuButtons.forEach(button => button.addEventListener('click', () => {
-                    this.ui.mainMenu();
-                }));
-                gameMenuButton.addEventListener('click', () => {
-                    this.ui.mainMenu();
-                });
-                gameRestartButton.addEventListener('click', this.startGame.bind(this));
-                gameInstructionsButton.addEventListener('click', () => {
-                    this.pause();
-                    this.ui.swapToScreen(this.ui.instructionsScreen);
-                    document.getElementById('instructions-back-button').addEventListener('click', () => {
-                    this.ui.swapToScreen(this.ui.gameContainer);
-                    this.resume();
-                    }, { once: true });
-                });
-                }
+            playButton.addEventListener('click', this.startGame.bind(this));
+            settingsButton.addEventListener('click', this.ui.settings.bind(this.ui));
+            instructionsButton.addEventListener('click', this.ui.instructions.bind(this.ui));
+            playAgainButton.addEventListener('click', this.startGame.bind(this));
+            mainMenuButtons.forEach(button => button.addEventListener('click', () => {
+                this.ui.mainMenu();
+            }));
+            gameMenuButton.addEventListener('click', () => {
+                this.ui.mainMenu();
+            });
+            gameRestartButton.addEventListener('click', this.startGame.bind(this));
+            gameInstructionsButton.addEventListener('click', () => {
+                this.pause();
+                this.ui.swapToScreen(this.ui.instructionsScreen);
+                document.getElementById('instructions-back-button').addEventListener('click', () => {
+                this.ui.swapToScreen(this.ui.gameContainer);
+                this.resume();
+                }, { once: true });
+            });
             }
+        }
 
-            const game = new Game();
-            game.prepareGame();
+        const game = new Game();
+        game.prepareGame();
         });
     </script>
   </body>
