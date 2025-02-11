@@ -155,8 +155,8 @@
     </div>
     <div id="hud">
         <div class="game-score">
-            <h2>Score: <span id="score">0</span></h2>
-            <h2>High Score: <span id="high-score">0</span></h2>
+            <span>Score: <span id="score">0</span>
+            <span>High Score: <span id="high-score">0</span>
         </div>
     </div>
 
@@ -291,7 +291,6 @@
 
             this.gameOver = false;
             this.score = 0;
-            this.highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
             this.reviveBonus = null;
             this.gameTime = 0;
 
@@ -398,20 +397,6 @@
             }
             }
 
-            updateScore() {
-                this.score++;
-                let highScore = this.highScore;
-                let score = this.score;
-
-                this.scoreDisplay.textContent = score;
-
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('highScore', highScore); // Store in localStorage
-                    highScoreDisplay.textContent = highScore;
-                }
-            }
-
             resetGame() {
             this.gameOver = false;
             this.score = 0;
@@ -472,12 +457,22 @@
             }
 
             this.logic.gameTime++;
-            this.logic.updateScore();
+            this.updateScore(this.logic.score++);
 
             if (this.logic.gameOver) {
                 this.ui.endGame();
                 this.done = true;
             }
+            }
+
+            updateScore(score) {
+                let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+                this.ui.scoreDisplay.textContent = score;
+                if (score > highScore) {
+                    highScore = score;
+                }
+                this.ui.highScoreDisplay.textContent = highScore;
+                localStorage.setItem('highScore', highScore); 
             }
 
             resetGame() {
