@@ -219,6 +219,10 @@
           <li>New ghosts spawn every 20 seconds.</li>
           <li>Game ends only if both players die.</li>
           <li>After 30 seconds, a bonus appears to revive a dead player.</li>
+          <li>Powerups will be generated to help the player.</li>
+          <li>Teleport Power up = purple</li>
+         <li>invincibility = gold </li>
+         <li>Speed increase = blue</li>
         </ul>
         <button id="instructions-back-button">Back</button>
       </div>
@@ -337,9 +341,17 @@
             this.score = 0;
             this.reviveBonus = null;
             this.gameTime = 0;
+            this.powerUps = [];
+            this.obstacles = this.generateObstacles();
 
-            this.player1 = { x: 100, y: 100, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "yellow", alive: true };
-            this.player2 = { x: 700, y: 500, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "blue", alive: true };
+            this.player1 = this.generateSafePosition("yellow");
+            this.player2 = this.generateSafePosition("blue");
+            
+
+
+
+            // this.player1 = { x: 100, y: 100, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "yellow", alive: true };
+            // this.player2 = { x: 700, y: 500, width: this.playerSize, height: this.playerSize, dx: 0, dy: 0, color: "blue", alive: true };
 
             this.redGhosts = Array.from({ length: 2 }, () => this.createGhost("red"));
             this.whiteGhosts = Array.from({ length: 2 }, () => this.createGhost("white"));
@@ -352,81 +364,289 @@
             window.addEventListener("resize", () => this.resizeCanvas());
             }
 
+            generateSafePosition(color) {
+        let position;
+        let attempts = 0;
+        do {
+            position = {
+                x: Math.random() * (this.canvas.width - this.playerSize),
+                y: Math.random() * (this.canvas.height - this.playerSize),
+                width: this.playerSize,
+                height: this.playerSize,
+                color: color,
+                alive: true,
+                invincible: false
+            };
+            attempts++;
+        } while (this.obstacles.some(obstacle => obstacle.collidesWith(position)) && attempts < 50);
+
+        return position;
+    }
+
+
+            generateObstacles() {
+    const obstacles = [];
+    const minDistance = 80; // Minimum distance between obstacles
+
+    for (let i = 0; i < 8; i++) { // You can adjust the number of obstacles
+        let newObstacle;
+        let attempts = 0;
+
+        do {
+            newObstacle = new Obstacle(
+                Math.random() * (this.canvas.width - 50),
+                Math.random() * (this.canvas.height - 50),
+                75,
+                75,
+                Math.random() > 0.5 ? "rectangle" : "circle"
+            );
+            attempts++;
+        } while (
+            obstacles.some(obstacle => this.getDistance(obstacle, newObstacle) < minDistance) && attempts < 20
+        );
+
+        obstacles.push(newObstacle);
+    }
+
+    return obstacles;
+}
+
+// Helper function to calculate the distance between two obstacles
+getDistance(obstacle1, obstacle2) {
+    const dx = (obstacle1.x + obstacle1.width / 2) - (obstacle2.x + obstacle2.width / 2);
+    const dy = (obstacle1.y + obstacle1.height / 2) - (obstacle2.y + obstacle2.height / 2);
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+
+
+
+    spawnPowerUp() {
+    // const types = ['speed', 'invincibility', 'teleport'];
+    const types = ['invincibility'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    let newPowerUp;
+    do {
+        newPowerUp = new PowerUp(
+            type,
+            Math.random() * (this.canvas.width - 20),
+            Math.random() * (this.canvas.height - 20)
+        );
+    } while (this.obstacles.some(obstacle => obstacle.collidesWith(newPowerUp)));
+
+    this.powerUps.push(newPowerUp);
+}
+
+
+    checkPowerUpCollision(player) {
+        this.powerUps.forEach((powerUp, index) => {
+            if (powerUp.active && player.x < powerUp.x + 20 && player.x + 20 > powerUp.x && player.y < powerUp.y + 20 && player.y + 20 > powerUp.y) {
+                powerUp.active = false;
+                this.activatePowerUp(player, powerUp.type);
+                setTimeout(() => this.powerUps.splice(index, 1), 500);
+            }
+        });
+    }
+
+    activatePowerUp(player, type) {
+    if (type === 'speed') {
+        player.speed = 6;
+        setTimeout(() => player.speed = this.speed, 30000);
+    } else if (type === 'invincibility') {
+        player.invincible = true;
+        setTimeout(() => player.invincible = false, 30000);
+    } else if (type === 'teleport') {
+        let newPosition;
+        do {
+            newPosition = {
+                x: Math.random() * (this.canvas.width - 20),
+                y: Math.random() * (this.canvas.height - 20),
+                width: player.width,
+                height: player.height
+            };
+        } while (this.obstacles.some(obstacle => obstacle.collidesWith(newPosition))); // Ensure it's not inside an obstacle
+
+        player.x = newPosition.x;
+        player.y = newPosition.y;
+    }
+}
+
+
             resizeCanvas() {
             this.canvas.width = Math.min(window.innerWidth * 0.9, 800);
             this.canvas.height = Math.min(window.innerHeight * 0.7, 600);
             }
 
             createGhost(color) {
-            return {
-                x: Math.random() * (this.canvas.width - this.ghostSize),
-                y: Math.random() * (this.canvas.height - this.ghostSize),
-                dx: Math.random() > 0.5 ? this.initialGhostSpeed : -this.initialGhostSpeed,
-                dy: Math.random() > 0.5 ? this.initialGhostSpeed : -this.initialGhostSpeed,
-                color: color
-            };
-            }
+    let newGhost;
+    do {
+        newGhost = {
+            x: Math.random() * (this.canvas.width - this.ghostSize),
+            y: Math.random() * (this.canvas.height - this.ghostSize),
+            dx: Math.random() > 0.5 ? this.initialGhostSpeed : -this.initialGhostSpeed,
+            dy: Math.random() > 0.5 ? this.initialGhostSpeed : -this.initialGhostSpeed,
+            color: color,
+            width: this.ghostSize,
+            height: this.ghostSize
+        };
+    } while (this.obstacles.some(obstacle => obstacle.collidesWith(newGhost))); // Ensure no collision on spawn
+
+    return newGhost;
+}
+
+            
+        
 
             updatePlayer(player, up, down, left, right) {
-            if (!player.alive) return;
-            player.dx = (this.keys[right] ? this.speed : 0) - (this.keys[left] ? this.speed : 0);
-            player.dy = (this.keys[down] ? this.speed : 0) - (this.keys[up] ? this.speed : 0);
+    if (!player.alive) return;
 
-            player.x += player.dx;
-            player.y += player.dy;
+    let newX = player.x + ((this.keys[right] ? this.speed : 0) - (this.keys[left] ? this.speed : 0));
+    let newY = player.y + ((this.keys[down] ? this.speed : 0) - (this.keys[up] ? this.speed : 0));
 
-            player.x = Math.max(0, Math.min(this.canvas.width - player.width, player.x));
-            player.y = Math.max(0, Math.min(this.canvas.height - player.height, player.y));
-            }
+    // Check obstacle collisions before updating position
+    let collisionX = this.obstacles.some(obstacle => obstacle.collidesWith({ x: newX, y: player.y, width: player.width, height: player.height }));
+    let collisionY = this.obstacles.some(obstacle => obstacle.collidesWith({ x: player.x, y: newY, width: player.width, height: player.height }));
+
+    if (!collisionX) player.x = Math.max(0, Math.min(this.canvas.width - player.width, newX));
+    if (!collisionY) player.y = Math.max(0, Math.min(this.canvas.height - player.height, newY));
+}
+
+
+            // if (!this.obstacles.some(obstacle => obstacle.collidesWith({ x: player.x, y: player.y, width: player.width, height: player.height }))) {
+            // player.x = Math.max(0, Math.min(this.canvas.width - player.width, player.x));
+            // player.y = Math.max(0, Math.min(this.canvas.height - player.height, player.y));
+        
+
+        //     player.x = Math.max(0, Math.min(this.canvas.width - player.width, player.x));
+        //     player.y = Math.max(0, Math.min(this.canvas.height - player.height, player.y));
+
+        //     if (!player.alive) return;
+        // const newX = player.x + ((this.keys[right] ? player.speed : 0) - (this.keys[left] ? player.speed : 0));
+        // const newY = player.y + ((this.keys[down] ? player.speed : 0) - (this.keys[up] ? player.speed : 0));
+
+        // if (!this.obstacles.some(obstacle => obstacle.collidesWith({ x: newX, y: newY, width: player.width, height: player.height }))) {
+        //     player.x = Math.max(0, Math.min(this.canvas.width - player.width, newX));
+        //     player.y = Math.max(0, Math.min(this.canvas.height - player.height, newY));
+        // }
+            // }
 
             updateGhosts(ghosts) {
-            ghosts.forEach(ghost => {
-                ghost.x += ghost.dx;
-                ghost.y += ghost.dy;
-                if (ghost.x <= 0 || ghost.x + this.ghostSize >= this.canvas.width) ghost.dx *= -1;
-                if (ghost.y <= 0 || ghost.y + this.ghostSize >= this.canvas.height) ghost.dy *= -1;
-            });
-            }
+    ghosts.forEach(ghost => {
+        let newX = ghost.x + ghost.dx;
+        let newY = ghost.y + ghost.dy;
+
+        let collisionX = this.obstacles.some(obstacle => 
+            obstacle.collidesWith({ x: newX, y: ghost.y, width: this.ghostSize, height: this.ghostSize })
+        );
+        let collisionY = this.obstacles.some(obstacle => 
+            obstacle.collidesWith({ x: ghost.x, y: newY, width: this.ghostSize, height: this.ghostSize })
+        );
+
+        if (!collisionX) {
+            ghost.x = newX;
+        } else {
+            ghost.dx *= -1; // Reverse horizontal direction upon collision
+        }
+
+        if (!collisionY) {
+            ghost.y = newY;
+        } else {
+            ghost.dy *= -1; // Reverse vertical direction upon collision
+        }
+
+        // Ensure ghosts bounce off canvas edges
+        if (ghost.x <= 0 || ghost.x + this.ghostSize >= this.canvas.width) {
+            ghost.dx *= -1;
+        }
+        if (ghost.y <= 0 || ghost.y + this.ghostSize >= this.canvas.height) {
+            ghost.dy *= -1;
+        }
+    });
+}
+
+
 
             checkCollision(a, b) {
             return a.x < b.x + this.ghostSize && a.x + this.playerSize > b.x && a.y < b.y + this.ghostSize && a.y + this.playerSize > b.y;
             }
 
+            // checkCollisions() {
+            // this.redGhosts.forEach((ghost, index) => {
+            //     if (this.player1.alive && this.checkCollision(this.player1, ghost)) this.player1.alive = false;
+            //     if (this.player2.alive && this.checkCollision(this.player2, ghost)) this.redGhosts.splice(index, 1);
+            // });
+
+            // this.whiteGhosts.forEach((ghost, index) => {
+            //     if (this.player2.alive && this.checkCollision(this.player2, ghost)) this.player2.alive = false;
+            //     if (this.player1.alive && this.checkCollision(this.player1, ghost)) this.whiteGhosts.splice(index, 1);
+            // });
+
+            // if (this.reviveBonus && (this.checkCollision(this.player1, this.reviveBonus) || this.checkCollision(this.player2, this.reviveBonus))) {
+            //     this.player1.alive = true;
+            //     this.player2.alive = true;
+            //     this.reviveBonus = null;
+            // }
+
+            // if (!this.player1.alive && !this.player2.alive) {
+            //     this.gameOver = true;
+            // }
+            // }
+
             checkCollisions() {
-            this.redGhosts.forEach((ghost, index) => {
-                if (this.player1.alive && this.checkCollision(this.player1, ghost)) this.player1.alive = false;
-                if (this.player2.alive && this.checkCollision(this.player2, ghost)) this.redGhosts.splice(index, 1);
-            });
+    this.redGhosts.forEach((ghost, index) => {
+        if (this.player1.alive && !this.player1.invincible && this.checkCollision(this.player1, ghost)) {
+            this.player1.alive = false;
+        }
+        if (this.player2.alive && this.checkCollision(this.player2, ghost)) {
+            this.redGhosts.splice(index, 1);
+        }
+    });
 
-            this.whiteGhosts.forEach((ghost, index) => {
-                if (this.player2.alive && this.checkCollision(this.player2, ghost)) this.player2.alive = false;
-                if (this.player1.alive && this.checkCollision(this.player1, ghost)) this.whiteGhosts.splice(index, 1);
-            });
+    this.whiteGhosts.forEach((ghost, index) => {
+        if (this.player2.alive && !this.player2.invincible && this.checkCollision(this.player2, ghost)) {
+            this.player2.alive = false;
+        }
+        if (this.player1.alive && this.checkCollision(this.player1, ghost)) {
+            this.whiteGhosts.splice(index, 1);
+        }
+    });
 
-            if (this.reviveBonus && (this.checkCollision(this.player1, this.reviveBonus) || this.checkCollision(this.player2, this.reviveBonus))) {
-                this.player1.alive = true;
-                this.player2.alive = true;
-                this.reviveBonus = null;
-            }
+    // Revive bonus check
+    if (this.reviveBonus && 
+        (this.checkCollision(this.player1, this.reviveBonus) || this.checkCollision(this.player2, this.reviveBonus))) {
+        this.player1.alive = true;
+        this.player2.alive = true;
+        this.reviveBonus = null;
+    }
 
-            if (!this.player1.alive && !this.player2.alive) {
-                this.gameOver = true;
-            }
-            }
+    // **Ensure Game Ends When Both Players Die**
+    if (!this.player1.alive && !this.player2.alive) {
+        this.gameOver = true;
+    }
+}
+
+
 
             spawnNewGhosts() {
             this.redGhosts.push(this.createGhost("red"));
             this.whiteGhosts.push(this.createGhost("white"));
             }
-
             spawnReviveBonus() {
-            this.reviveBonus = {
-                x: Math.random() * (this.canvas.width - 20),
-                y: Math.random() * (this.canvas.height - 20),
-                width: 20,
-                height: 20
-            };
-            }
+    let newBonus;
+    do {
+        newBonus = {
+            x: Math.random() * (this.canvas.width - 20),
+            y: Math.random() * (this.canvas.height - 20),
+            width: 20,
+            height: 20
+        };
+    } while (this.obstacles.some(obstacle => obstacle.collidesWith(newBonus))); // Ensure it's not inside an obstacle
+
+    this.reviveBonus = newBonus;
+}
+
+            
 
             drawPlayer(player) {
             if (player.alive) {
@@ -449,6 +669,19 @@
             }
             }
 
+            // drawPowerUps (){
+            //     {
+            //     ctx.fillStyle = this.colors[this.type];
+            // ctx.beginPath();
+            // ctx.arc(this.x + 10, this.y + 10, 10, 0, Math.PI * 2);
+            // ctx.shadowBlur = 10;
+            // ctx.shadowColor = this.colors[this.type];
+            // ctx.fill();
+            // ctx.shadowBlur = 0;
+            //     this.ctx.fillRect(this.reviveBonus.x, this.reviveBonus.y, this.reviveBonus.width, this.reviveBonus.height);
+            // } 
+            // }
+
             resetGame() {
             this.gameOver = false;
             this.score = 0;
@@ -461,6 +694,62 @@
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // Clear the canvas
             }
         }
+
+        class PowerUp {
+    constructor(type, x, y) {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.width = 20;
+        this.height = 20;
+        this.active = true;
+        this.colors = { 'speed': 'blue', 'invincibility': 'gold', 'teleport': 'purple' };
+    }
+
+    draw(ctx) {
+        if (this.active) {
+            ctx.fillStyle = this.colors[this.type];
+            ctx.beginPath();
+            ctx.arc(this.x + 10, this.y + 10, 10, 0, Math.PI * 2);
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.colors[this.type];
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    }
+}
+
+class Obstacle {
+    constructor(x, y, width, height, shape) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.shape = shape;
+        this.color = "gray";
+        this.image = new Image();
+        this.image.src = "images/obstacle-neon-wall.webp";
+    }
+
+    draw(ctx) {
+        if (this.image.complete) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            // If image isn't loaded yet, draw a placeholder rectangle
+            ctx.fillStyle = "gray";
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    collidesWith(entity) {
+        return (
+            entity.x < this.x + this.width &&
+            entity.x + entity.width > this.x &&
+            entity.y < this.y + this.height &&
+            entity.y + entity.height > this.y
+        );
+    }
+}
 
         class Game {
             constructor() {
@@ -495,6 +784,13 @@
             this.logic.updateGhosts(this.logic.redGhosts);
             this.logic.updateGhosts(this.logic.whiteGhosts);
             this.logic.checkCollisions();
+
+            this.logic.checkPowerUpCollision(this.logic.player1);
+            this.logic.checkPowerUpCollision(this.logic.player2);
+        
+            if (this.logic.gameTime % 1200 === 0) {
+            this.logic.spawnPowerUp();
+            }
 
             if (this.logic.gameTime % 1200 === 0 && this.logic.gameTime > 0) {
                 this.logic.spawnNewGhosts();
@@ -542,6 +838,8 @@
                 this.logic.drawGhosts(this.logic.redGhosts);
                 this.logic.drawGhosts(this.logic.whiteGhosts);
                 this.logic.drawBonus();
+                this.logic.powerUps.forEach(powerUp => powerUp.draw(this.logic.ctx));
+                this.logic.obstacles.forEach(obstacle => obstacle.draw(this.logic.ctx));
                 // this.lastFrameTime = timestamp;
             // }
             // if (this.animationFrameId) {
