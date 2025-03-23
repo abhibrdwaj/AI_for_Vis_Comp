@@ -1,0 +1,21 @@
+game_creation_task:
+  description: >
+    Design and build a simple HTML5 browser game based on the following idea:
+    A Pac-Man-inspired 2-player game where Player 1 (yellow) and Player 2 (blue) 
+    try to survive against red and white ghosts. The ghosts spawn every 20 seconds, 
+    a revive bonus appears every 30 seconds, and the game ends when both players die.
+    Focus on creating core game logic, movement, and basic UI.
+  expected_output: >
+    A complete HTML + JavaScript game code implementing the described logic. 
+    Output as markdown code blocks without additional commentary.
+  agent: game_developer
+
+game_testing_task:
+  description: >
+    Test the generated HTML5 game code for functionality, user experience, and bugs. 
+    Ensure that all game rules (ghost spawning, revive bonus, game end conditions) 
+    are properly implemented. Provide a test report.
+  expected_output: >
+    A detailed bug report or confirmation of correctness. Include suggestions 
+    for improvement if necessary.
+  agent: game_tester
