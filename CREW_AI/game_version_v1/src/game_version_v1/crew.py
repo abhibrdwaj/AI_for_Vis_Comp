@@ -33,6 +33,33 @@ class GameVersionV1():
         return Task(
             config=self.tasks_config['game_testing_task'],
         )
+    
+    @agent
+    def asset_creator(self) -> Agent:
+        return Agent(
+            config=self.agents_config['asset_creator'],
+            verbose=True
+        )
+
+    @agent
+    def asset_integrator(self) -> Agent:
+        return Agent(
+        config=self.agents_config['asset_integrator'],
+        verbose=True
+        )
+
+    @task
+    def asset_creation_task(self) -> Task:
+        return Task(
+        config=self.tasks_config['asset_creation_task'],
+        )
+
+    @task
+    def asset_integration_task(self) -> Task:
+        return Task(
+        config=self.tasks_config['asset_integration_task'],
+    )
+
 
     @crew
     def crew(self) -> Crew:
@@ -40,12 +67,17 @@ class GameVersionV1():
         return Crew(
             agents=[
                 self.game_developer(),
-                self.game_tester()
-            ],
+                self.game_tester(),
+                self.asset_creator(),
+                self.asset_integrator()
+                ],
             tasks=[
                 self.game_creation_task(),
+                self.asset_creation_task(),
+                self.asset_integration_task(),
                 self.game_testing_task()
-            ],
+                ],
+
             process=Process.sequential,
             verbose=True,
         )

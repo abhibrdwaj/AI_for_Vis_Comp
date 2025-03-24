@@ -1,14 +1,22 @@
 game_creation_task:
   description: >
-    Design and build a simple HTML5 browser game based on the following idea:
-    A Pac-Man-inspired 2-player game where Player 1 (yellow) and Player 2 (blue) 
-    try to survive against red and white ghosts. The ghosts spawn every 20 seconds, 
-    a revive bonus appears every 30 seconds, and the game ends when both players die.
-    Focus on creating core game logic, movement, and basic UI.
+    Design and build a  HTML5 game where the player navigates through a dark maze 
+    using a torchlight (limited visible area). There are two keys hidden in the maze and a locked door.
+
+    Game rules:
+    - The player explores the maze with a torch (only nearby tiles are visible).
+    - There are two keys in the maze. 
+    - When the player collects a key, the maze layout changes, but the player's, remaining key’s, and door’s positions remain the same.
+    - Once both keys are collected, the door unlocks, and the player can exit.
+    - Use pure HTML, CSS, and JavaScript (no game engines or external libraries).
+
   expected_output: >
-    A complete HTML + JavaScript game code implementing the described logic. 
-    Output as markdown code blocks without additional commentary.
+    A complete HTML + JavaScript game implementing this logic.
+    Output the entire game as markdown code blocks without additional commentary.
+    Be sure to include mobile responsiveness and touch controls.
   agent: game_developer
+
+
 
 game_testing_task:
   description: >
@@ -19,3 +27,34 @@ game_testing_task:
     A detailed bug report or confirmation of correctness. Include suggestions 
     for improvement if necessary.
   agent: game_tester
+
+asset_creation_task:
+  description: >
+    Create all visual assets needed for the maze game:
+    - Maze tiles (floor, wall)
+    - Player sprite with torchlight effect
+    - Key and door
+    - Mobile-friendly UI buttons (up/down/left/right)
+    
+    Assets should be output as:
+    - CSS for styling effects
+    - Base64 images or simple inline SVG/HTML for the game sprites
+    
+    Keep everything lightweight and compatible with mobile.
+  expected_output: >
+    A list of assets in HTML/CSS/base64 format, including styles or image blocks, ready to be integrated into the final game.
+  agent: asset_creator
+
+asset_integration_task:
+  description: >
+    Combine the game logic with the assets produced by the asset_creator task.
+    Integrate all visuals, styles, and mobile UI elements into a single, clean HTML+CSS+JS file.
+    
+    Ensure the result:
+    - Is playable
+    - Works on mobile and desktop
+    - Uses the torch and maze game logic
+  expected_output: >
+    A final game file (HTML+CSS+JS) with all assets embedded.
+    Output it as a markdown code block with no extra text.
+  agent: asset_integrator
