@@ -1,0 +1,117 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dark Maze</title>
+<style>
+body {
+  margin: 0;
+  background-color: #111;
+}
+
+canvas {
+  display: block;
+    background-color: #111;
+}
+
+#menu, #settings, #gameOver {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the dialog */
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+#restartButton {
+  padding: 10px 20px;
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#menuButton {
+  padding: 10px 20px;
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="480" height="320"></canvas>
+
+<div id="menu">
+  <h1>Dark Maze</h1>
+  <button id="menuButton">Start Game</button>
+</div>
+
+<div id="settings">
+  
+</div>
+
+<div id="gameOver">
+  <h1>Game Over!</h1>
+  <p>Try again?</p>
+  <button id="restartButton">Restart</button>
+</div>
+
+<script>
+  // TODO: Game Logic Here
+</script>
+
+</body>
+</html>
+```
+
+**Explanation:**
+
+* **HTML:**
+  * Sets up a basic HTML page with a `canvas` element (`gameCanvas`) for the game graphics and three divs (`menu`, `settings`, `gameOver`) to create modal-like interfaces for the intro, settings, and game over screens.
+* **CSS:**
+  * Styles the page with a dark background. 
+  * `menu`, `settings`, and `gameOver` divs are hidden initially (`display: none`).
+  * Centering styles and backgrounds are applied to the dialogs. 
+  * Buttons are styled.
+* **JavaScript (TODO):**
+  * You'll need to write the JavaScript code to:
+    1. **Draw the maze:** 
+       * Initialize a canvas context.
+       * Load maze data (from an array like the one provided).
+       * Draw walls, spaces, and the player.
+    2. **Handle player input:** 
+       * Use keyboard events or touchscreen gestures to control the player's movement within the maze.
+    3. **Implement game logic:**
+       * Check for collisions, key collection, and victory/defeat conditions.
+    4. **Manage UI:**
+       * Show/hide the UI elements (` menu`, `settings`, `gameOver`) at appropriate times.
+
+**Mobile Responsiveness:**
+
+* **Flexbox or Grid:** 
+  * You can use CSS Flexbox or Grid to create layouts that adapt to different screen sizes. 
+* **Viewport Meta Tag:**
+  * Include the following meta tag in your `<head>` to ensure proper responsiveness:
+    
+    ```html
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ```
+
+**Key Points:**
+
+* **Canvas Is Your Canvas:**  
+  * Canvas is perfect for this type of game. You have fine-grained control over drawing, making it ideal for creating the maze visually.
+* **Start Simple, Iterate:** 
+  * Begin with a basic maze structure, player movement, and win/lose conditions. Then gradually add more features (like torches, keys, visual effects) over time.
+* **Debug, Test, and Refine:**  
+  * Thoroughly test your game on different devices and screen sizes to ensure it works as expected.

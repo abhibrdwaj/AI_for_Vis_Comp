@@ -1,83 +1,114 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
+# If you want to run a snippet of code before or after the crew starts,
+# you can use the @before_kickoff and @after_kickoff decorators
+# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+
 @CrewBase
 class GameVersionV1():
-    """GameVersionV1 crew for HTML game development and testing"""
+    """GameVersionV1 crew"""
 
+    # Learn more about YAML configuration files here:
+    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
+    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
+    # If you would like to add tools to your agents, you can learn more about it here:
+    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
-    def game_developer(self) -> Agent:
+    def game_logic_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['game_developer'],
+            config=self.agents_config['game_logic_agent'],
+            model=self.agents_config['game_logic_agent']['model'],
             verbose=True
         )
 
     @agent
-    def game_tester(self) -> Agent:
+    def ui_ux_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['game_tester'],
+            config=self.agents_config["ui_ux_agent"],
+            model=self.agents_config["ui_ux_agent"]["model"],
             verbose=True
         )
 
-    @task
-    def game_creation_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['game_creation_task'],
+    @agent
+    def user_input_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["user_input_agent"],
+            model=self.agents_config["user_input_agent"]["model"],
+            verbose=True
         )
 
-    @task
-    def game_testing_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['game_testing_task'],
+    @agent
+    def code_integrator_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["code_integrator_agent"],
+            model=self.agents_config["code_integrator_agent"]["model"],
+            verbose=True
         )
+
+    @agent
+    def tester_debugger_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["tester_debugger_agent"],
+            model=self.agents_config["tester_debugger_agent"]["model"],
+            verbose=True
+        )
+
+
+    # To learn more about structured task outputs,
+    # task dependencies, and task callbacks, check out the documentation:
+    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
+    @task
+    def generate_game_logic(self) -> Task:
+      return Task(
+          config=self.tasks_config["generate_game_logic"],
+      )
+
+    @task
+    def design_ui_ux(self) -> Task:
+      return Task(
+          config=self.tasks_config["design_ui_ux"],
+      )
     
-    @agent
-    def asset_creator(self) -> Agent:
-        return Agent(
-            config=self.agents_config['asset_creator'],
-            verbose=True
-        )
-
-    @agent
-    def asset_integrator(self) -> Agent:
-        return Agent(
-        config=self.agents_config['asset_integrator'],
-        verbose=True
-        )
+    @task
+    def handle_input_controls(self) -> Task:
+      return Task(
+          config=self.tasks_config["handle_input_controls"],
+      )
 
     @task
-    def asset_creation_task(self) -> Task:
-        return Task(
-        config=self.tasks_config['asset_creation_task'],
-        )
-
+    def handle_input_controls(self) -> Task:
+      return Task(
+          config=self.tasks_config["handle_input_controls"],
+      )
+    
     @task
-    def asset_integration_task(self) -> Task:
-        return Task(
-        config=self.tasks_config['asset_integration_task'],
-    )
+    def integrate_code_modules(self) -> Task:
+      return Task(
+          config=self.tasks_config["integrate_code_modules"],
+      )
+    
+    @task
+    def test_and_debug_game(self) -> Task:
+      return Task(
+          config=self.tasks_config["test_and_debug_game"],
+      )
+    
 
 
     @crew
     def crew(self) -> Crew:
-        """Creates the GameVersionV1 crew with game dev and testing only"""
-        return Crew(
-            agents=[
-                self.game_developer(),
-                self.game_tester(),
-                self.asset_creator(),
-                self.asset_integrator()
-                ],
-            tasks=[
-                self.game_creation_task(),
-                self.asset_creation_task(),
-                self.asset_integration_task(),
-                self.game_testing_task()
-                ],
+        """Creates the GameVersionV1 crew"""
+        # To learn how to add knowledge sources to your crew, check out the documentation:
+        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
 
+        return Crew(
+            agents=self.agents, # Automatically created by the @agent decorator
+            tasks=self.tasks, # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
+            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )

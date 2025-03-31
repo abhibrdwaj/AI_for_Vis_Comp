@@ -1,60 +1,43 @@
-game_creation_task:
+generate_game_logic:
   description: >
-    Design and build a  HTML5 game where the player navigates through a dark maze 
-    using a torchlight (limited visible area). There are two keys hidden in the maze and a locked door.
-
-    Game rules:
-    - The player explores the maze with a torch (only nearby tiles are visible).
-    - There are two keys in the maze. 
-    - When the player collects a key, the maze layout changes, but the player's, remaining key’s, and door’s positions remain the same.
-    - Once both keys are collected, the door unlocks, and the player can exit.
-    - Use pure HTML, CSS, and JavaScript (no game engines or external libraries).
-
+    Write core JavaScript logic for a dynamic dark maze game called "Shifting Shadows".
   expected_output: >
-    A complete HTML + JavaScript game implementing this logic.
-    Output the entire game as markdown code blocks without additional commentary.
-    Be sure to include mobile responsiveness and touch controls.
-  agent: game_developer
+    JavaScript file with modular functions for maze generation, torchlight, key collection, and re-randomization.
+  output_file: game_outputs/game_logic.js
+  agent: game_logic_agent
 
-
-
-game_testing_task:
+design_ui_ux:
   description: >
-    Test the generated HTML5 game code for functionality, user experience, and bugs. 
-    Ensure that all game rules (ghost spawning, revive bonus, game end conditions) 
-    are properly implemented. Provide a test report.
+    Create a responsive UI for the game, including main menu, settings, HUD, and game over screen.
   expected_output: >
-    A detailed bug report or confirmation of correctness. Include suggestions 
-    for improvement if necessary.
-  agent: game_tester
+    HTML and CSS layout with mobile-first design principles.
+  context: ["generate_game_logic"]
+  output_file: game_outputs/ui_ux.html
+  agent: ui_ux_agent
 
-asset_creation_task:
+handle_input_controls:
   description: >
-    Create all visual assets needed for the maze game:
-    - Maze tiles (floor, wall)
-    - Player sprite with torchlight effect
-    - Key and door
-    - Mobile-friendly UI buttons (up/down/left/right)
-    
-    Assets should be output as:
-    - CSS for styling effects
-    - Base64 images or simple inline SVG/HTML for the game sprites
-    
-    Keep everything lightweight and compatible with mobile.
+    Implement input handling for both keyboard and mobile touch devices.
   expected_output: >
-    A list of assets in HTML/CSS/base64 format, including styles or image blocks, ready to be integrated into the final game.
-  agent: asset_creator
+    JavaScript input module compatible with canvas-based movement.
+  context: ["generate_game_logic", "design_ui_ux"]
+  output_file: game_outputs/input_control.js
+  agent: user_input_agent
 
-asset_integration_task:
+integrate_code_modules:
   description: >
-    Combine the game logic with the assets produced by the asset_creator task.
-    Integrate all visuals, styles, and mobile UI elements into a single, clean HTML+CSS+JS file.
-    
-    Ensure the result:
-    - Is playable
-    - Works on mobile and desktop
-    - Uses the torch and maze game logic
+    Combine code from all agents into one runnable HTML5 game file.
   expected_output: >
-    A final game file (HTML+CSS+JS) with all assets embedded.
-    Output it as a markdown code block with no extra text.
-  agent: asset_integrator
+    A single HTML file with all components integrated and working.
+  context: ["generate_game_logic", "design_ui_ux", "handle_input_controls"]
+  output_file: game_outputs/code_integrated.html
+  agent: code_integrator_agent
+
+test_and_debug_game:
+  description: >
+    Review the full HTML game code, identify issues, and fix errors in logic or layout.
+  expected_output: >
+    Final polished HTML5 file with no bugs and fully playable logic.
+  context: ["integrate_code_modules"]
+  output_file: game_outputs/final_game.html
+  agent: tester_debugger_agent

@@ -1,0 +1,43 @@
+Implement input handling for "Shifting Shadows".
+
+Template to follow:
+{{ html_template }}
+
+Tasks:
+- Use keyboard arrows/WASD for movement
+- Use mobile swipe gestures for same actions
+- Handle long press for pause, tap for torch toggle
+- Smoothly integrate torchlight movement with player
+
+Requirements:
+- JavaScript event listeners for both desktop and touch
+- Abstract input logic so it works across devices
+- Modular, reusable functions
+- Output only JavaScript code
+
+
+You are a UI interaction expert focused on designing responsive input systems for HTML5 browser games.
+
+Create the **input handling system** for the game **"Shifting Shadows"**, which should work seamlessly on both mobile and desktop.
+
+Controls:
+- Keyboard arrows/WASD for movements in desktop.
+- On-screen touch controls for mobile swipe gestures.
+- Handle long press for pause, tap for torch toggle
+- Smoothly integrate torchlight movement with player.
+
+Integration Requirements:
+- Trigger functions like `startGame()`, `pause()`, `resume()`, and `onKeyCollected()` from input events.
+- Ensure your code calls game logic methods responsibly without interfering with animation loops.
+- Make touch events fallback-safe (for example, ignore on desktops).
+
+Mobile Responsiveness:
+- Ensure touch gestures are fluid and responsive.
+- Avoid fixed positioning that breaks on smaller screens.
+
+Coordination:
+- Match the element IDs in the HTML template (e.g., `#play-button`, `#instructions-back-button`).
+- Use common function/event names shared across agents to maintain integration compatibility.
+
+Output:
+- Provide JavaScript input module ready to plug into the Game class, maintaining modularity and compatibility with other code.
