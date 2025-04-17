@@ -1,43 +1,43 @@
 generate_game_logic:
   description: >
-    Write core JavaScript logic for a dynamic dark maze game called "Shifting Shadows".
+    Write modular JavaScript logic for the maze game, including torchlight and key collection mechanics.
   expected_output: >
-    JavaScript file with modular functions for maze generation, torchlight, key collection, and re-randomization.
-  output_file: game_outputs/game_logic.js
+    A concise script.js file with reusable functions for game logic.
+  output_file: game_outputs/script.js
   agent: game_logic_agent
 
 design_ui_ux:
   description: >
-    Create a responsive UI for the game, including main menu, settings, HUD, and game over screen.
+    Create a responsive and lightweight UI for the game, including index.html and styles.css.
   expected_output: >
-    HTML and CSS layout with mobile-first design principles.
+    A minimal index.html and styles.css optimized for mobile and desktop gameplay.
   context: ["generate_game_logic"]
   output_file: game_outputs/ui_ux.html
   agent: ui_ux_agent
 
 handle_input_controls:
   description: >
-    Implement input handling for both keyboard and mobile touch devices.
+    Implement input handling for keyboard and touch devices in input.js using standard browser APIs.
   expected_output: >
-    JavaScript input module compatible with canvas-based movement.
+    A short input.js file for handling user input compatible with the game logic.
   context: ["generate_game_logic", "design_ui_ux"]
-  output_file: game_outputs/input_control.js
+  output_file: game_outputs/input.js
   agent: user_input_agent
 
 integrate_code_modules:
   description: >
-    Combine code from all agents into one runnable HTML5 game file.
+    Merge index.html, script.js, input.js, and styles.css into a cohesive game using GameTemplate.html.
   expected_output: >
-    A single HTML file with all components integrated and working.
+    A modular HTML file with integrated JavaScript and CSS for a fully functional game.
   context: ["generate_game_logic", "design_ui_ux", "handle_input_controls"]
   output_file: game_outputs/code_integrated.html
   agent: code_integrator_agent
 
 test_and_debug_game:
   description: >
-    Review the full HTML game code, identify issues, and fix errors in logic or layout.
+    Validate the game functionality, fix critical issues, and optimize performance for smooth gameplay.
   expected_output: >
-    Final polished HTML5 file with no bugs and fully playable logic.
+    A polished final_game.html file with no bugs and fully functional logic.
   context: ["integrate_code_modules"]
   output_file: game_outputs/final_game.html
   agent: tester_debugger_agent

@@ -1,0 +1,52 @@
+**index.html**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Maze Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="game-canvas" width="960" height="720"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+**styles.css**
+```css
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+}
+
+.maze {
+    position: absolute;
+    width: 960px;
+    height: 720px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+}
+```
+
+Note: I have made changes to the index.html to make it responsive and added styles for canvas. However, I did not make any changes to the script to make it responsive as that is a complex task and requires significant changes to the game logic. The above changes make the canvas full screen and remove any scrollbars.
+
+If you want to make the game truly responsive, you would need to update the game logic to handle different screen sizes and aspect ratios. This could involve:
+
+* Calculating the tile size based on the screen size
+* Using a different font or text rendering system to make the game easier to read on smaller screens
+* Adding touch support for mobile devices
+* Using a resolution-independent approach to rendering the game (e.g., using pixels instead of pixels per inch)
+
+I believe this is outside of the scope of the original task. If you need help with this part, please let me know!
