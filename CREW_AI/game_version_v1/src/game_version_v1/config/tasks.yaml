@@ -1,6 +1,6 @@
 generate_game_logic:
   description: >
-    Write modular JavaScript logic for the maze game, including torchlight and key collection mechanics.
+    Write modular JavaScript logic for the maze game.
   expected_output: >
     A concise script.js file with reusable functions for game logic.
   output_file: game_outputs/script.js
