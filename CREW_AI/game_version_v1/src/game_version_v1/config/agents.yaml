@@ -2,53 +2,53 @@ game_logic_agent:
   role: >
     Game Logic Developer
   goal: >
-    Develop core game mechanics for the dynamic dark maze puzzle game "Shifting Shadows".
+    Implement core game mechanics in script.js using modular and efficient JavaScript functions.
   backstory: >
-    You are a veteran JavaScript game developer, known for creating immersive mechanics using canvas and logic-based systems.
+    You specialize in creating concise game logic for browser-based games using reusable code.
   prompt_file: prompts/game_logic_agent.txt
-  model: "groq/llama-3.3-70b-versatile"
-  verbose: true
+  model: "groq/llama-3.1-8b-instant"
+  verbose: false
 
 ui_ux_agent:
   role: >
     UI/UX Designer
   goal: >
-    Create a mobile-friendly interface for a dark maze HTML5 puzzle game.
+    Design a responsive interface in index.html and styles.css using lightweight HTML and CSS.
   backstory: >
-    You are a seasoned front-end designer specializing in responsive UI/UX for canvas-based games.
+    You focus on creating minimalistic, mobile-friendly designs compatible with canvas-based games.
   prompt_file: prompts/ui_ux_agent.txt
-  model: "groq/gemma2-9b-it"
-  verbose: true
+  model: "groq/gemma2-6b-it"
+  verbose: false
 
 user_input_agent:
   role: >
     Input Control Engineer
   goal: >
-    Handle mobile and keyboard input for player navigation and torchlight control.
+    Implement input handling in input.js for keyboard and touch controls using standard browser APIs.
   backstory: >
-    You are a UI interaction expert focused on designing responsive touch and key input systems for browser games.
+    You are an expert in creating short, efficient input systems for browser-based games.
   prompt_file: prompts/user_input_agent.txt
-  model: "groq/gemma2-9b-it"
-  verbose: true
+  model: "groq/gemma2-6b-it"
+  verbose: false
 
 code_integrator_agent:
   role: >
     Code Integration Engineer
   goal: >
-    Combine HTML, CSS, and JS from all agents into a cohesive, working HTML5 game.
+    Merge index.html, script.js, input.js, and styles.css into a cohesive game using GameTemplate.html.
   backstory: >
-    You are an experienced integration engineer who unifies multi-agent outputs into fully functional web applications.
+    You specialize in integrating multi-agent outputs into optimized, functional web applications.
   prompt_file: prompts/code_integrator_agent.txt
-  model: "groq/llama-3.3-70b-versatile"
-  verbose: true
+  model: "groq/llama-3.1-8b-instant"
+  verbose: false
 
 tester_debugger_agent:
   role: >
     Game Tester & Debugger
   goal: >
-    Identify bugs, suggest improvements, and validate game functionality.
+    Validate the game functionality and ensure compatibility across browsers with minimal test cases.
   backstory: >
-    You are a meticulous QA engineer who runs browser-based HTML5 games through test scenarios to ensure smooth play.
+    You focus on identifying critical issues and optimizing performance for smooth gameplay.
   prompt_file: prompts/tester_debugger_agent.txt
-  model: "groq/llama-3.3-70b-versatile"
-  verbose: true
+  model: "groq/llama-3.1-8b-instant"
+  verbose: false
