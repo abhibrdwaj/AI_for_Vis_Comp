@@ -1,4 +1,16 @@
-User name is John Doe.
-User is an AI Engineer.
-User is interested in AI Agents.
-User is based in San Francisco, California.
+user:
+  name: John Doe
+  profession: AI Engineer
+  interests:
+    - AI Agents
+    - Puzzle Games
+    - Strategy
+  location: San Francisco, California
+
+game_preferences:
+  difficulty: intermediate
+  platform: mobile + desktop
+  features:
+    - torchlight
+    - dynamic maze
+    - hidden keys

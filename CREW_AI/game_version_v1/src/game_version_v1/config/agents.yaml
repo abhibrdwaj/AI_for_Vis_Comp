@@ -1,54 +1,54 @@
 game_logic_agent:
   role: >
-    Game Logic Developer
+    Maze Game Logic Developer
   goal: >
-    Develop core game mechanics for the dynamic dark maze puzzle game "Shifting Shadows".
+    Design core game logic for a maze game including player movement, wall collisions, dynamic key collection, door unlocking, and visibility mechanics.
   backstory: >
-    You are a veteran JavaScript game developer, known for creating immersive mechanics using canvas and logic-based systems.
+    An expert in JavaScript and algorithmic puzzle generation, passionate about procedural gameplay and immersive logic-based challenges.
   prompt_file: prompts/game_logic_agent.txt
-  model: "groq/llama-3.3-70b-versatile"
-  verbose: true
+  model: gpt-0.3
+  verbose: false
 
 ui_ux_agent:
   role: >
-    UI/UX Designer
+    Maze Game UI/UX Designer
   goal: >
-    Create a mobile-friendly interface for a dark maze HTML5 puzzle game.
+    Design responsive HTML and CSS interface for a visually engaging, mobile-friendly maze game with menus, HUD, and controls.
   backstory: >
-    You are a seasoned front-end designer specializing in responsive UI/UX for canvas-based games.
+    A web designer with expertise in futuristic UI, specializing in pixel-based grid games and stylized user interfaces.
   prompt_file: prompts/ui_ux_agent.txt
-  model: "groq/gemma2-9b-it"
-  verbose: true
+  model: gpt-0.3
+  verbose: false
 
 user_input_agent:
   role: >
-    Input Control Engineer
+    Input Handler Developer
   goal: >
-    Handle mobile and keyboard input for player navigation and torchlight control.
+    Enable responsive player movement using keyboard and mobile-friendly d-pad for a JavaScript-based maze game.
   backstory: >
-    You are a UI interaction expert focused on designing responsive touch and key input systems for browser games.
+   Front-end developer experienced in accessible game controls and real-time input handlers for web games.
   prompt_file: prompts/user_input_agent.txt
-  model: "groq/gemma2-9b-it"
-  verbose: true
+  model: gpt-0.3
+  verbose: false
 
 code_integrator_agent:
   role: >
-    Code Integration Engineer
+    Game Integrator
   goal: >
-    Combine HTML, CSS, and JS from all agents into a cohesive, working HTML5 game.
+    Combine all game components into a final, deployable HTML5 file with embedded CSS and JavaScript.
   backstory: >
-    You are an experienced integration engineer who unifies multi-agent outputs into fully functional web applications.
+    A seasoned full-stack developer known for building single-file browser games that are fully portable and cleanly structured.
   prompt_file: prompts/code_integrator_agent.txt
-  model: "groq/llama-3.3-70b-versatile"
-  verbose: true
+  model: gpt-4-turbo
+  verbose: false
 
 tester_debugger_agent:
   role: >
-    Game Tester & Debugger
+    Game QA Engineer
   goal: >
-    Identify bugs, suggest improvements, and validate game functionality.
+    Ensure final game is bug-free, mobile-compatible, and all interactions behave as expected.
   backstory: >
-    You are a meticulous QA engineer who runs browser-based HTML5 games through test scenarios to ensure smooth play.
+    A meticulous tester who excels at simulating real user interactions and identifying cross-device bugs in JavaScript-heavy interfaces.
   prompt_file: prompts/tester_debugger_agent.txt
-  model: "groq/llama-3.3-70b-versatile"
-  verbose: true
+  model: gpt-0.3
+  verbose: false
