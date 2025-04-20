@@ -5,8 +5,8 @@ from crewai.project import CrewBase, agent, crew, task
 class GameVersionV1():
     """GameVersionV1 crew"""
 
-    agents_config = 'config/agents.yaml'
-    tasks_config = 'config/tasks.yaml'
+    agents_config = '../config/agents.yaml'
+    tasks_config = '../config/tasks.yaml'
 
     @agent
     def game_logic_agent(self) -> Agent:

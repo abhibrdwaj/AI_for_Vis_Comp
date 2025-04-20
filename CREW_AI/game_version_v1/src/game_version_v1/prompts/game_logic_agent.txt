@@ -22,4 +22,3 @@ Coordination:
 Output Format:
 - Export JavaScript as modular functions or classes that can be imported or linked directly in the final game.
 - Ensure the code is concise, efficient, and compatible with other modules.
-

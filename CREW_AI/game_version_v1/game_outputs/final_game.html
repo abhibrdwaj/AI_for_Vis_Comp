@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,204 +5,403 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maze Game</title>
     <style>
-        * {
-            box-sizing: border-box;
+        body, html {
             margin: 0;
             padding: 0;
+            height: 100%;
+            font-family: 'Orbitron', sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
         }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        .screen {
+            display: none;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .screen.active {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
         }
-
-        #game-container {
+        .container {
             text-align: center;
+            max-width: 600px;
+            width: 90%;
         }
-
-        #maze {
+        button {
+            background: linear-gradient(135deg, #283c86 0%, #45a247 100%);
+            border: 2px solid #fff;
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            padding: 12px 30px;
+            margin: 20px auto 0;
+            display: block;
+            width: 215.15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #45a247 0%, #283c86 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        #hud {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #1a1a2e;
+            padding: 10px;
+            z-index: 100;
+            display: none;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        #game-container {
+            position: relative;
+            width: 90vw;
+            height: 60vw;
+            max-width: 800px;
+            max-height: 600px;
+            background-color: #000;
             display: grid;
-            grid-template-columns: repeat(10, 40px);
-            grid-template-rows: repeat(10, 40px);
-            gap: 2px;
-            margin: 20px auto;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(15, 1fr);
         }
-
-        .cell {
-            width: 40px;
-            height: 40px;
-            background-color: #ccc;
-            border: 1px solid #999;
+        .tile {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
         }
-
+        .visible {
+            background-color: transparent;
+        }
+        .wall {
+            background-color: #8B4513;
+        }
         .player {
-            background-color: #0088ff;
+            background-color: #0f0;
         }
-
-        .end {
-            background-color: #ff0000;
+        .key {
+            background-color: #ff0;
         }
-
-        @media (max-width: 600px) {
-            #maze {
-                grid-template-columns: repeat(5, 20px);
-                grid-template-rows: repeat(5, 20px);
-            }
-            .cell {
-                width: 20px;
-                height: 20px;
-            }
+        .door {
+            background-color: #f00;
+        }
+        .dpad {
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px 60px;
+            gap: 5px;
+        }
+        .dpad button {
+            width: 60px;
+            height: 60px;
+            background-color: #555;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .dpad button:active {
+            background-color: #777;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <h1>Maze Game</h1>
-        <div id="maze"></div>
-        <p>Move with arrow keys or swipe on the screen</p>
+    <div id="hud">Keys: 0/3</div>
+
+    <div id="start-menu-screen" class="active screen">
+        <div class="container">
+            <h1 id="game-title">Maze Game</h1>
+            <button id="play-button">Play</button>
+            <button id="instructions-button">Instructions</button>
+        </div>
     </div>
+
+    <div id="instructions-screen" class="screen">
+        <div class="container">
+            <h2>Instructions</h2>
+            <p>Navigate through the maze, collect all keys, and unlock the door to win!</p>
+            <button id="instructions-back-button">Back</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="game-container"></div>
+        <div class="dpad">
+            <button id="up">↑</button>
+            <button disabled></button>
+            <button id="down">↓</button>
+            <button id="left">←</button>
+            <button disabled></button>
+            <button id="right">→</button>
+        </div>
+    </div>
+
+    <div id="game-over-screen" class="screen">
+        <div class="container">
+            <h2>Game Over</h2>
+            <button id="play-again-button">Play Again</button>
+            <button id="main-menu-button">Main Menu</button>
+        </div>
+    </div>
+
     <script>
-        // Game Configurations
-        const mazeConfig = {
-            rows: 10,
-            cols: 10,
-            start: { x: 0, y: 0 },
-            end: { x: 9, y: 9 },
-        };
+        const TILE_SIZE = 40;
+        const MAZE_WIDTH = 20;
+        const MAZE_HEIGHT = 15;
+        const totalKeys = 3;
 
-        // Game State
-        let playerPosition = { ...mazeConfig.start };
-        let maze = [];
+        let keysCollected = 0;
+        let playerPosition = { x: 1, y: 1 };
+        let keyPositions = [];
+        let doorPosition = { x: 18, y: 13 };
 
-        // Initialize the Maze
-        function initializeMaze(rows, cols) {
-            maze = Array.from({ length: rows }, () => Array(cols).fill(0));
-            // Here you can implement maze generation logic if needed
-        }
+        const gameContainer = document.getElementById('game-container');
+        const hud = document.getElementById('hud');
 
-        // Render the Maze
-        function renderMaze() {
-            const mazeContainer = document.getElementById("maze");
-            mazeContainer.innerHTML = ""; // Clear previous maze
-            maze.forEach((row, rowIndex) => {
-                row.forEach((cell, colIndex) => {
-                    const cellDiv = document.createElement("div");
-                    cellDiv.className = "cell";
-                    if (rowIndex === playerPosition.y && colIndex === playerPosition.x) {
-                        cellDiv.classList.add("player");
+        function createMaze() {
+            gameContainer.innerHTML = '';
+            keyPositions = [];
+            for (let y = 0; y < MAZE_HEIGHT; y++) {
+                for (let x = 0; x < MAZE_WIDTH; x++) {
+                    const tile = document.createElement('div');
+                    tile.classList.add('tile');
+                    if (x === 0 || y === 0 || x === MAZE_WIDTH - 1 || y === MAZE_HEIGHT - 1 || Math.random() < 0.3) {
+                        tile.classList.add('wall');
                     }
-                    if (rowIndex === mazeConfig.end.y && colIndex === mazeConfig.end.x) {
-                        cellDiv.classList.add("end");
+                    gameContainer.appendChild(tile);
+                }
+            }
+            placePlayer();
+            placeKeys();
+            placeDoor();
+            updateVisibility(); // Initially reveal only the tiles around the player
+        }
+
+        function placePlayer() {
+            let position;
+            do {
+                position = {
+                    x: Math.floor(Math.random() * (MAZE_WIDTH - 2)) + 1,
+                    y: Math.floor(Math.random() * (MAZE_HEIGHT - 2)) + 1
+                };
+                const index = position.y * MAZE_WIDTH + position.x;
+                const tile = gameContainer.children[index];
+                if (!tile.classList.contains('wall')) {
+                    playerPosition = position;
+                    tile.classList.add('player');
+                    break;
+                }
+            } while (true);
+        }
+
+        function placeKeys() {
+            for (let i = 0; i < totalKeys; i++) {
+                let position;
+                do {
+                    position = {
+                        x: Math.floor(Math.random() * (MAZE_WIDTH - 2)) + 1,
+                        y: Math.floor(Math.random() * (MAZE_HEIGHT - 2)) + 1
+                    };
+                    const index = position.y * MAZE_WIDTH + position.x;
+                    const tile = gameContainer.children[index];
+                    if (
+                        !tile.classList.contains('wall') &&
+                        !keyPositions.some(k => k.x === position.x && k.y === position.y) &&
+                        !(position.x === playerPosition.x && position.y === playerPosition.y)
+                    ) {
+                        keyPositions.push(position);
+                        tile.classList.add('key');
+                        break;
                     }
-                    mazeContainer.appendChild(cellDiv);
-                });
-            });
-        }
-
-        // Move Player
-        function movePlayer(direction) {
-            const { x, y } = playerPosition;
-            switch (direction) {
-                case "UP":
-                    if (y > 0) playerPosition.y--;
-                    break;
-                case "DOWN":
-                    if (y < mazeConfig.rows - 1) playerPosition.y++;
-                    break;
-                case "LEFT":
-                    if (x > 0) playerPosition.x--;
-                    break;
-                case "RIGHT":
-                    if (x < mazeConfig.cols - 1) playerPosition.x++;
-                    break;
-            }
-            checkWinCondition();
-            renderMaze();
-        }
-
-        // Check Win Condition
-        function checkWinCondition() {
-            if (playerPosition.x === mazeConfig.end.x && playerPosition.y === mazeConfig.end.y) {
-                alert("Congratulations! You've reached the end of the maze!");
+                } while (true);
             }
         }
 
-        // Input Handling for Keyboard and Touch Controls
-        const keys = {};
+        function placeDoor() {
+            let position;
+            do {
+                position = {
+                    x: Math.floor(Math.random() * (MAZE_WIDTH - 2)) + 1,
+                    y: Math.floor(Math.random() * (MAZE_HEIGHT - 2)) + 1
+                };
+                const index = position.y * MAZE_WIDTH + position.x;
+                const tile = gameContainer.children[index];
+                if (
+                    !tile.classList.contains('wall') &&
+                    !keyPositions.some(k => k.x === position.x && k.y === position.y) &&
+                    !(position.x === playerPosition.x && position.y === playerPosition.y)
+                ) {
+                    doorPosition = position;
+                    tile.classList.add('door');
+                    break;
+                }
+            } while (true);
+        }
 
-        document.addEventListener("keydown", (event) => {
-            keys[event.key] = true;
-        });
+        function movePlayer(dx, dy) {
+            const newX = playerPosition.x + dx;
+            const newY = playerPosition.y + dy;
 
-        document.addEventListener("keyup", (event) => {
-            keys[event.key] = false;
-        });
-
-        let touchStartX = null;
-        let touchStartY = null;
-
-        document.addEventListener("touchstart", (event) => {
-            const touch = event.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        });
-
-        document.addEventListener("touchmove", (event) => {
-            if (!touchStartX || !touchStartY) {
+            if (newX < 0 || newY < 0 || newX >= MAZE_WIDTH || newY >= MAZE_HEIGHT) {
                 return;
             }
-            const touch = event.touches[0];
-            const diffX = touch.clientX - touchStartX;
-            const diffY = touch.clientY - touchStartY;
 
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 0) {
-                    movePlayer("RIGHT");
-                } else {
-                    movePlayer("LEFT");
-                }
-            } else {
-                if (diffY > 0) {
-                    movePlayer("DOWN");
-                } else {
-                    movePlayer("UP");
-                }
+            const index = newY * MAZE_WIDTH + newX;
+            const tile = gameContainer.children[index];
+
+            if (!tile.classList.contains('wall')) {
+                const oldIndex = playerPosition.y * MAZE_WIDTH + playerPosition.x;
+                gameContainer.children[oldIndex].classList.remove('player');
+                playerPosition = { x: newX, y: newY };
+                tile.classList.add('player');
+                checkKeyCollision();
+                checkDoorCollision();
+                updateVisibility(); // Update visibility after moving
             }
-            touchStartX = null; // Reset touch start positions after handling
-            touchStartY = null;
+        }
+
+        function updateVisibility() {
+            // Reset all tiles to hidden (black)
+            Array.from(gameContainer.children).forEach(tile => {
+                tile.classList.remove('visible');
+                tile.style.backgroundColor = '#000'; // Ensure all tiles are black by default
+            });
+
+            // Make the player's tile and 8 surrounding tiles visible
+            const directions = [
+                { x: 0, y: 0 }, // Player's current position
+                { x: 1, y: 0 },
+                { x: -1, y: 0 },
+                { x: 0, y: 1 },
+                { x: 0, y: -1 },
+                { x: 1, y: 1 },
+                { x: -1, y: -1 },
+                { x: 1, y: -1 },
+                { x: -1, y: 1 }
+            ];
+
+            directions.forEach(dir => {
+                const x = playerPosition.x + dir.x;
+                const y = playerPosition.y + dir.y;
+                if (x >= 0 && y >= 0 && x < MAZE_WIDTH && y < MAZE_HEIGHT) {
+                    const index = y * MAZE_WIDTH + x;
+                    const tile = gameContainer.children[index];
+                    tile.classList.add('visible');
+
+                    // Restore the original color for visible tiles
+                    if (tile.classList.contains('wall')) {
+                        tile.style.backgroundColor = '#8B4513'; // Brown for walls
+                    } else if (tile.classList.contains('key')) {
+                        tile.style.backgroundColor = '#ff0'; // Yellow for keys
+                    } else if (tile.classList.contains('door')) {
+                        tile.style.backgroundColor = '#f00'; // Red for door
+                    } else if (tile.classList.contains('player')) {
+                        tile.style.backgroundColor = '#0f0'; // Green for player
+                    } else {
+                        tile.style.backgroundColor = 'transparent'; // Transparent for empty tiles
+                    }
+                }
+            });
+
+            // Ensure keys and door are always visible
+            keyPositions.forEach(key => {
+                const index = key.y * MAZE_WIDTH + key.x;
+                const tile = gameContainer.children[index];
+                tile.style.backgroundColor = '#ff0'; // Yellow for keys
+            });
+
+            const doorIndex = doorPosition.y * MAZE_WIDTH + doorPosition.x;
+            const doorTile = gameContainer.children[doorIndex];
+            doorTile.style.backgroundColor = '#f00'; // Red for door
+        }
+
+        function checkKeyCollision() {
+            const keyIndex = keyPositions.findIndex(
+                k => k.x === playerPosition.x && k.y === playerPosition.y
+            );
+            if (keyIndex !== -1) {
+                const keyPosition = keyPositions[keyIndex];
+                const index = keyPosition.y * MAZE_WIDTH + keyPosition.x;
+                const tile = gameContainer.children[index];
+                tile.classList.remove('key');
+                keyPositions.splice(keyIndex, 1);
+                keysCollected++;
+                hud.innerText = `Keys: ${keysCollected}/${totalKeys}`;
+            }
+        }
+
+        function checkDoorCollision() {
+            if (
+                playerPosition.x === doorPosition.x &&
+                playerPosition.y === doorPosition.y &&
+                keysCollected === totalKeys
+            ) {
+                alert('You Win! You escaped the maze!');
+                keysCollected = 0;
+                playerPosition = { x: 1, y: 1 };
+                createMaze();
+            }
+        }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'ArrowUp') movePlayer(0, -1);
+            if (event.key === 'ArrowDown') movePlayer(0, 1);
+            if (event.key === 'ArrowLeft') movePlayer(-1, 0);
+            if (event.key === 'ArrowRight') movePlayer(1, 0);
         });
 
-        // Game loop to handle continuous key presses
-        function gameLoop() {
-            if (keys["ArrowUp"]) {
-                movePlayer("UP");
-            }
-            if (keys["ArrowDown"]) {
-                movePlayer("DOWN");
-            }
-            if (keys["ArrowLeft"]) {
-                movePlayer("LEFT");
-            }
-            if (keys["ArrowRight"]) {
-                movePlayer("RIGHT");
-            }
-            requestAnimationFrame(gameLoop); // Request next frame
-        }
+        document.getElementById('up').addEventListener('click', () => movePlayer(0, -1));
+        document.getElementById('down').addEventListener('click', () => movePlayer(0, 1));
+        document.getElementById('left').addEventListener('click', () => movePlayer(-1, 0));
+        document.getElementById('right').addEventListener('click', () => movePlayer(1, 0));
 
-        // Start the Game
-        function startGame() {
-            initializeMaze(mazeConfig.rows, mazeConfig.cols);
-            renderMaze();
-            requestAnimationFrame(gameLoop); // Start the game loop
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const hud = document.getElementById('hud');
+            const startMenuScreen = document.getElementById('start-menu-screen');
+            const instructionsScreen = document.getElementById('instructions-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const gameOverScreen = document.getElementById('game-over-screen');
 
-        // Initialize the game on page load
-        window.onload = startGame;
+            const playButton = document.getElementById('play-button');
+            const instructionsButton = document.getElementById('instructions-button');
+            const instructionsBackButton = document.getElementById('instructions-back-button');
+            const playAgainButton = document.getElementById('play-again-button');
+            const mainMenuButton = document.getElementById('main-menu-button');
+
+            function swapToScreen(screen) {
+                startMenuScreen.classList.remove('active');
+                instructionsScreen.classList.remove('active');
+                gameScreen.classList.remove('active');
+                gameOverScreen.classList.remove('active');
+                screen.classList.add('active');
+
+                hud.style.display = screen === gameScreen ? 'block' : 'none';
+            }
+
+            playButton.addEventListener('click', () => swapToScreen(gameScreen));
+            instructionsButton.addEventListener('click', () => swapToScreen(instructionsScreen));
+            instructionsBackButton.addEventListener('click', () => swapToScreen(startMenuScreen));
+            playAgainButton.addEventListener('click', () => swapToScreen(gameScreen));
+            mainMenuButton.addEventListener('click', () => swapToScreen(startMenuScreen));
+
+            createMaze();
+        });
     </script>
 </body>
 </html>
-```

@@ -7,9 +7,9 @@ import json
 import litellm
 from datetime import datetime
 
-sys.path.append(os.path.abspath("CREW_AI/game_version_v1/GameTemplate.html"))
+sys.path.append(os.path.abspath("../../../"))
 
-from game_version_v1.crew import GameVersionV1
+from crew.GameVersionV1 import GameVersionV1
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -28,7 +28,7 @@ def load_progress():
 
 def run():
     inputs = {
-        "template_path": "C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/GameTemplate.html",
+        "template_path": "GameTemplate.html",
         "platform": "mobile + desktop",
         "difficulty": "intermediate",
         "player_features": ["torchlight", "dynamic maze", "hidden keys"]
