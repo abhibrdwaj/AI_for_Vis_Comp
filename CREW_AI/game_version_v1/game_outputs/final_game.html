@@ -160,6 +160,10 @@
         </div>
     </div>
 
+    <audio id="game-bgm" src="C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/assets/game_bgm.mp3" loop></audio>
+    <audio id="key-sound" src="C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/assets/key_find.wav"></audio>
+    <audio id="door-sound" src="C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/assets/door_find.wav"></audio>
+
     <script>
         const TILE_SIZE = 40;
         const MAZE_WIDTH = 20;
@@ -173,6 +177,11 @@
 
         const gameContainer = document.getElementById('game-container');
         const hud = document.getElementById('hud');
+
+        // Get audio elements
+        const gameBgm = document.getElementById('game-bgm');
+        const keySound = document.getElementById('key-sound');
+        const doorSound = document.getElementById('door-sound');
 
         function createMaze() {
             gameContainer.innerHTML = '';
@@ -331,6 +340,7 @@
             doorTile.style.backgroundColor = '#f00'; // Red for door
         }
 
+        // Play key sound when a key is collected
         function checkKeyCollision() {
             const keyIndex = keyPositions.findIndex(
                 k => k.x === playerPosition.x && k.y === playerPosition.y
@@ -343,15 +353,24 @@
                 keyPositions.splice(keyIndex, 1);
                 keysCollected++;
                 hud.innerText = `Keys: ${keysCollected}/${totalKeys}`;
+
+                // Play key sound
+                keySound.currentTime = 0; // Reset sound to the beginning
+                keySound.play();
             }
         }
 
+        // Play door sound when the player reaches the door with all keys
         function checkDoorCollision() {
             if (
                 playerPosition.x === doorPosition.x &&
                 playerPosition.y === doorPosition.y &&
                 keysCollected === totalKeys
             ) {
+                // Play door sound
+                doorSound.currentTime = 0; // Reset sound to the beginning
+                doorSound.play();
+
                 alert('You Win! You escaped the maze!');
                 keysCollected = 0;
                 playerPosition = { x: 1, y: 1 };
@@ -394,7 +413,16 @@
                 hud.style.display = screen === gameScreen ? 'block' : 'none';
             }
 
-            playButton.addEventListener('click', () => swapToScreen(gameScreen));
+            playButton.addEventListener('click', () => {
+                swapToScreen(gameScreen);
+
+                // Start background music when the user clicks "Play"
+                gameBgm.volume = 0.5; // Adjust volume as needed
+                gameBgm.play().catch(error => {
+                    console.error('Failed to play background music:', error);
+                });
+            });
+
             instructionsButton.addEventListener('click', () => swapToScreen(instructionsScreen));
             instructionsBackButton.addEventListener('click', () => swapToScreen(startMenuScreen));
             playAgainButton.addEventListener('click', () => swapToScreen(gameScreen));
