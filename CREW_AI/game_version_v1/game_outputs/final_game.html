@@ -201,10 +201,7 @@
         </div>
     </div>
 
-    <audio id="background-audio" autoplay loop>
-        <source src="../assets/maze_bg.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+
 
     <script>
         const TILE_SIZE = 40;
@@ -219,6 +216,11 @@
 
         const gameContainer = document.getElementById('game-container');
         const hud = document.getElementById('hud');
+
+        // Get audio elements
+        const gameBgm = document.getElementById('game-bgm');
+        const keySound = document.getElementById('key-sound');
+        const doorSound = document.getElementById('door-sound');
 
         function createMaze() {
             gameContainer.innerHTML = '';
@@ -416,6 +418,7 @@
             doorTile.style.backgroundColor = '#f00'; // Red for door
         }
 
+        // Play key sound when a key is collected
         function checkKeyCollision() {
             const keyIndex = keyPositions.findIndex(
                 k => k.x === playerPosition.x && k.y === playerPosition.y
@@ -428,15 +431,24 @@
                 keyPositions.splice(keyIndex, 1);
                 keysCollected++;
                 hud.innerText = `Keys: ${keysCollected}/${totalKeys}`;
+
+                // Play key sound
+                keySound.currentTime = 0; // Reset sound to the beginning
+                keySound.play();
             }
         }
 
+        // Play door sound when the player reaches the door with all keys
         function checkDoorCollision() {
             if (
                 playerPosition.x === doorPosition.x &&
                 playerPosition.y === doorPosition.y &&
                 keysCollected === totalKeys
             ) {
+                // Play door sound
+                doorSound.currentTime = 0; // Reset sound to the beginning
+                doorSound.play();
+
                 alert('You Win! You escaped the maze!');
                 keysCollected = 0;
                 playerPosition = { x: 1, y: 1 };
@@ -516,9 +528,7 @@
             }
 
             playButton.addEventListener('click', () => {
-                resetGame();
-                swapToScreen(gameScreen);
-            });
+
             instructionsButton.addEventListener('click', () => swapToScreen(instructionsScreen));
             instructionsBackButton.addEventListener('click', () => swapToScreen(startMenuScreen));
             playAgainButton.addEventListener('click', () => {
