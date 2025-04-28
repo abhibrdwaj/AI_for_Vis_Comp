@@ -119,9 +119,49 @@
         .dpad button:active {
             background-color: #777;
         }
+        #game-controls {
+            position: absolute; /* Changed to absolute for proper placement */
+            top: 10px; /* Add spacing from the top */
+            left: 50%;
+            transform: translateX(-50%); /* Center horizontally */
+            display: flex;
+            flex-direction: row; /* Align buttons vertically */
+            align-items: center;
+            gap: 10px; /* Add spacing between buttons */
+            z-index: 101;
+        }
+        #game-controls button {
+            width: 150px; /* Set a consistent width for buttons */
+            padding: 10px;
+            font-size: 16px;
+        }
+        .difficulty-button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #283c86 0%, #45a247 100%);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .difficulty-button.active {
+            background: linear-gradient(135deg, #45a247 0%, #283c86 100%);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        .difficulty-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
+    <div id="game-controls">
+        <button id="game-menu-button">Menu</button>
+        <button id="game-restart-button">Restart</button>
+        <button id="game-instructions-button">Instructions</button>
+    </div>
     <div id="hud">Keys: 0/3</div>
 
     <div id="start-menu-screen" class="active screen">
@@ -129,14 +169,55 @@
             <h1 id="game-title">Maze Game</h1>
             <button id="play-button">Play</button>
             <button id="instructions-button">Instructions</button>
+            <button id="settings-button">Settings</button>
         </div>
     </div>
 
     <div id="instructions-screen" class="screen">
         <div class="container">
             <h2>Instructions</h2>
-            <p>Navigate through the maze, collect all keys, and unlock the door to win!</p>
+            <section>
+                <h3>Controls:</h3>
+                <ul>
+                    <li>WASD or Arrow keys to move</li>
+                    <li>Touch controls on mobile devices</li>
+                </ul>
+            </section>
+            <section>
+                <h3>Objective:</h3>
+                <ul>
+                    <li>Collect all keys</li>
+                    <li>Reach the red door to win</li>
+                </ul>
+            </section>
+            <section>
+                <h3>Tips:</h3>
+                <ul>
+                    <li>Explore the maze carefully</li>
+                    <li>Use the torchlight to reveal hidden paths</li>
+                    <li>Be quick! You have limited time!</li>
+                </ul>
+            </section>
+            <footer>
+                <p>Good luck!</p>
+                <p><em>Game created by AI for Visual Computing</em></p>
+            </footer>
             <button id="instructions-back-button">Back</button>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <div class="container">
+            <h2>Settings</h2>
+            <section>
+                <h3>Difficulty:</h3>
+                <div>
+                    <button id="easy-button" class="difficulty-button">Easy</button>
+                    <button id="medium-button" class="difficulty-button">Medium</button>
+                    <button id="hard-button" class="difficulty-button">Hard</button>
+                </div>
+            </section>
+            <button id="settings-back-button">Back</button>
         </div>
     </div>
 
@@ -173,6 +254,52 @@
 
         const gameContainer = document.getElementById('game-container');
         const hud = document.getElementById('hud');
+
+        let timerInterval;
+
+        function endGameWithGameOver() {
+            const gameOverScreen = document.getElementById('game-over-screen');
+            const gameOverMessage = document.createElement('h2');
+            gameOverScreen.classList.add('active');
+            gameOverMessage.innerText = "Game Over! Time's up!";
+            gameOverScreen.querySelector('.container').prepend(gameOverMessage);
+
+            swapToScreen(gameOverScreen);
+        }
+
+        const TIME_TO_FINISH = {
+            EASY: 60,
+            MEDIUM: 45,
+            HARD: 30
+        };
+
+        let timeRemaining;
+
+        function startTimer() {
+            const hud = document.getElementById('hud');
+            const difficulty = localStorage.getItem('difficulty') || 'MEDIUM'; // Default to MEDIUM
+            timeRemaining = TIME_TO_FINISH[difficulty.toUpperCase()]; // Set time based on difficulty
+            hud.innerText = `Keys: ${keysCollected}/${totalKeys} | Time: ${timeRemaining}s`;
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                hud.innerText = `Keys: ${keysCollected}/${totalKeys} | Time: ${timeRemaining}s`;
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    endGameWithGameOver();
+                }
+            }, 1000);
+        }
+
+        function resetGame() {
+            keysCollected = 0; // Reset key count
+            hud.innerText = `Keys: ${keysCollected}/${totalKeys}`; // Update HUD
+            playerPosition = { x: 1, y: 1 }; // Reset player position
+            createMaze(); // Recreate the maze
+            clearInterval(timerInterval); // Clear any existing timer
+            startTimer(); // Start a new timer
+        }
 
         function createMaze() {
             gameContainer.innerHTML = '';
@@ -342,7 +469,7 @@
                 tile.classList.remove('key');
                 keyPositions.splice(keyIndex, 1);
                 keysCollected++;
-                hud.innerText = `Keys: ${keysCollected}/${totalKeys}`;
+                hud.innerText = `Keys: ${keysCollected}/${totalKeys} | Time: ${timeRemaining}s`;
             }
         }
 
@@ -355,7 +482,7 @@
                 alert('You Win! You escaped the maze!');
                 keysCollected = 0;
                 playerPosition = { x: 1, y: 1 };
-                createMaze();
+                resetGame();
             }
         }
 
@@ -383,22 +510,87 @@
             const instructionsBackButton = document.getElementById('instructions-back-button');
             const playAgainButton = document.getElementById('play-again-button');
             const mainMenuButton = document.getElementById('main-menu-button');
+            const gameMenuButton = document.getElementById('game-menu-button');
+            const gameRestartButton = document.getElementById('game-restart-button');
+            const gameInstructionsButton = document.getElementById('game-instructions-button');
+            const gameControls = document.getElementById('game-controls');
+            const settingsButton = document.getElementById('settings-button');
+            const settingsBackButton = document.getElementById('settings-back-button');
+            const settingsScreen = document.getElementById('settings-screen');
+            const difficultyButtons = document.querySelectorAll('.difficulty-button');
 
             function swapToScreen(screen) {
                 startMenuScreen.classList.remove('active');
                 instructionsScreen.classList.remove('active');
                 gameScreen.classList.remove('active');
                 gameOverScreen.classList.remove('active');
+                settingsScreen.classList.remove('active');
                 screen.classList.add('active');
 
                 hud.style.display = screen === gameScreen ? 'block' : 'none';
+                if (screen.id === 'game-screen') {
+                    hud.style.display = 'block';
+                    gameControls.style.display = 'flex'; // Show game controls
+                } else {
+                    hud.style.display = 'none';
+                    gameControls.style.display = 'none'; // Hide game controls
+                }
             }
 
-            playButton.addEventListener('click', () => swapToScreen(gameScreen));
+            playButton.addEventListener('click', () => {
+                resetGame();
+                swapToScreen(gameScreen);
+            });
             instructionsButton.addEventListener('click', () => swapToScreen(instructionsScreen));
             instructionsBackButton.addEventListener('click', () => swapToScreen(startMenuScreen));
-            playAgainButton.addEventListener('click', () => swapToScreen(gameScreen));
+            playAgainButton.addEventListener('click', () => {
+                resetGame();
+                swapToScreen(gameScreen);
+            });
             mainMenuButton.addEventListener('click', () => swapToScreen(startMenuScreen));
+            gameMenuButton.addEventListener('click', () => swapToScreen(document.getElementById('start-menu-screen')));
+            gameRestartButton.addEventListener('click', () => {
+                resetGame();
+                swapToScreen(document.getElementById('game-screen'));
+            });
+            gameInstructionsButton.addEventListener('click', () => {
+                clearInterval(timerInterval); // Pause the timer
+                swapToScreen(document.getElementById('instructions-screen'));
+                document.getElementById('instructions-back-button').addEventListener('click', () => {
+                    swapToScreen(document.getElementById('game-screen'));
+                    startTimer(); // Resume the timer
+                }, { once: true });
+            });
+            settingsButton.addEventListener('click', () => {
+                startMenuScreen.classList.remove('active');
+                settingsScreen.classList.add('active');
+            });
+
+            settingsBackButton.addEventListener('click', () => {
+                settingsScreen.classList.remove('active');
+                startMenuScreen.classList.add('active');
+            });
+
+            // Load saved difficulty from local storage or default to Medium
+            const savedDifficulty = localStorage.getItem('difficulty') || 'Medium';
+            setActiveDifficultyButton(savedDifficulty);
+
+            difficultyButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedDifficulty = button.innerText;
+                    localStorage.setItem('difficulty', selectedDifficulty); // Save to local storage
+                    setActiveDifficultyButton(selectedDifficulty);
+                });
+            });
+
+            function setActiveDifficultyButton(selectedDifficulty) {
+                difficultyButtons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.innerText === selectedDifficulty) {
+                        button.classList.add('active');
+                    }
+                });
+            }
 
             createMaze();
         });
