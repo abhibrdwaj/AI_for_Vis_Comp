@@ -52,3 +52,25 @@ tester_debugger_agent:
   prompt_file: prompts/tester_debugger_agent.txt
   model: gpt-0.3
   verbose: false
+
+image_asset_agent:
+  role: >
+    Game Visual Assets Designer
+  goal: >
+    Generate and optimize visual assets for the game including backgrounds, UI elements, and game objects.
+  backstory: >
+    A digital artist specializing in game assets and UI design with expertise in API-based image generation tools.
+  prompt_file: prompts/image_asset_agent.txt
+  model: gpt-4-turbo
+  verbose: false
+
+asset_integration_agent:
+  role: >
+    Game Asset Integration Specialist
+  goal: >
+    Seamlessly integrate all visual assets into the game codebase ensuring proper loading and responsiveness.
+  backstory: >
+    A front-end specialist with expertise in asset management and optimization for web-based games.
+  prompt_file: prompts/asset_integration_agent.txt
+  model: gpt-4-turbo
+  verbose: false

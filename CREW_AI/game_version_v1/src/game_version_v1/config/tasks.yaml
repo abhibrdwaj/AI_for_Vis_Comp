@@ -26,6 +26,26 @@ handle_input_controls:
   output_file: game_outputs/input.js
   agent: user_input_agent
 
+generate_visual_assets:
+  description: >
+    Generate visual assets for the game using ChatGPT's image generation API, including startup screen, backgrounds, elements, and UI components.
+  expected_output: >
+    - A collection of game images for different screens and elements
+    - Image assets stored in `game_outputs/images/` directory
+  context: ["design_ui_ux"]
+  output_file: game_outputs/visual_assets_list.json
+  agent: image_asset_agent
+
+integrate_assets:
+  description: >
+    Integrate generated visual assets into the game codebase, ensuring proper loading, sizing, and responsiveness.
+  expected_output: >
+    - Updated HTML with image references
+    - JavaScript for asset loading and display
+  context: ["generate_visual_assets", "design_ui_ux"]
+  output_file: game_outputs/assets_integrated.html
+  agent: asset_integration_agent
+
 integrate_code_modules:
   description: >
     Merge the files (`index.html`, `styles.css`, `script.js`, `input.js`) into one deployable HTML file using the `GameTemplate.html`.
