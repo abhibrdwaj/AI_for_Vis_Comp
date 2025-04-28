@@ -119,9 +119,47 @@
         .dpad button:active {
             background-color: #777;
         }
+        #start-menu-screen,
+        #instructions-screen {
+            background-image: url('../assets/torch_maze_bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: rgba(0, 0, 0, 0.75); /* Dark overlay */
+            background-blend-mode: multiply;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        #game-controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(26, 26, 46, 0.8);
+            padding: 10px 0;
+            z-index: 101;
+            display: none; /* Ensure it is hidden initially */
+            justify-content: center;
+            gap: 10px;
+        }
+        #game-controls button {
+            display: inline-block;
+            width: auto;
+            padding: 8px 15px;
+            margin: 0 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
+    <div id="game-controls">
+        <button id="game-menu-button">Menu</button>
+        <button id="game-restart-button">Restart</button>
+        <button id="game-instructions-button">Instructions</button>
+    </div>
     <div id="hud">Keys: 0/3</div>
 
     <div id="start-menu-screen" class="active screen">
@@ -135,7 +173,10 @@
     <div id="instructions-screen" class="screen">
         <div class="container">
             <h2>Instructions</h2>
-            <p>Navigate through the maze, collect all keys, and unlock the door to win!</p>
+            <p>Navigate through the maze, using keyboards (WASD) or touch controls</p>
+            <p>Use Torchlight to explore the dark paths</p>
+            <p>Collect 2-4 keys</p>
+            <p>Then reach to the fixed red door!</p>
             <button id="instructions-back-button">Back</button>
         </div>
     </div>
@@ -160,9 +201,7 @@
         </div>
     </div>
 
-    <audio id="game-bgm" src="C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/assets/game_bgm.mp3" loop></audio>
-    <audio id="key-sound" src="C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/assets/key_find.wav"></audio>
-    <audio id="door-sound" src="C:/Users/shara/Desktop/AI_for_Vis_Comp/CREW_AI/game_version_v1/assets/door_find.wav"></audio>
+
 
     <script>
         const TILE_SIZE = 40;
@@ -219,6 +258,43 @@
             } while (true);
         }
 
+        function isReachable(start, target) {
+            const visited = new Set();
+            const queue = [start];
+            const directions = [
+                { x: 0, y: 1 },
+                { x: 0, y: -1 },
+                { x: 1, y: 0 },
+                { x: -1, y: 0 }
+            ];
+
+            while (queue.length > 0) {
+                const { x, y } = queue.shift();
+                const key = `${x},${y}`;
+
+                if (x === target.x && y === target.y) return true;
+                if (visited.has(key)) continue;
+
+                visited.add(key);
+
+                directions.forEach(dir => {
+                    const newX = x + dir.x;
+                    const newY = y + dir.y;
+                    const index = newY * MAZE_WIDTH + newX;
+                    if (
+                        newX >= 0 && newY >= 0 &&
+                        newX < MAZE_WIDTH && newY < MAZE_HEIGHT &&
+                        !visited.has(`${newX},${newY}`) &&
+                        !gameContainer.children[index].classList.contains('wall')
+                    ) {
+                        queue.push({ x: newX, y: newY });
+                    }
+                });
+            }
+
+            return false;
+        }
+
         function placeKeys() {
             for (let i = 0; i < totalKeys; i++) {
                 let position;
@@ -232,7 +308,8 @@
                     if (
                         !tile.classList.contains('wall') &&
                         !keyPositions.some(k => k.x === position.x && k.y === position.y) &&
-                        !(position.x === playerPosition.x && position.y === playerPosition.y)
+                        !(position.x === playerPosition.x && position.y === playerPosition.y) &&
+                        isReachable(playerPosition, position)
                     ) {
                         keyPositions.push(position);
                         tile.classList.add('key');
@@ -254,7 +331,8 @@
                 if (
                     !tile.classList.contains('wall') &&
                     !keyPositions.some(k => k.x === position.x && k.y === position.y) &&
-                    !(position.x === playerPosition.x && position.y === playerPosition.y)
+                    !(position.x === playerPosition.x && position.y === playerPosition.y) &&
+                    isReachable(playerPosition, position)
                 ) {
                     doorPosition = position;
                     tile.classList.add('door');
@@ -378,6 +456,13 @@
             }
         }
 
+        function resetGame() {
+            keysCollected = 0; // Reset key count
+            hud.innerText = `Keys: ${keysCollected}/${totalKeys}`; // Update HUD
+            playerPosition = { x: 1, y: 1 }; // Reset player position
+            createMaze(); // Recreate the maze
+        }
+
         document.addEventListener('keydown', event => {
             if (event.key === 'ArrowUp') movePlayer(0, -1);
             if (event.key === 'ArrowDown') movePlayer(0, 1);
@@ -403,6 +488,26 @@
             const playAgainButton = document.getElementById('play-again-button');
             const mainMenuButton = document.getElementById('main-menu-button');
 
+            const gameMenuButton = document.getElementById('game-menu-button');
+            const gameRestartButton = document.getElementById('game-restart-button');
+            const gameInstructionsButton = document.getElementById('game-instructions-button');
+
+            const backgroundAudio = document.getElementById('background-audio');
+
+            // Ensure audio plays even if autoplay is restricted
+            const playAudio = () => {
+                backgroundAudio.volume = 0.5; // Set volume to 50%
+                backgroundAudio.play().catch(() => {
+                    console.log('Autoplay was blocked. Waiting for user interaction.');
+                });
+            };
+
+            // Attempt to play audio on page load
+            playAudio();
+
+            // Add a fallback to play audio on user interaction
+            document.body.addEventListener('click', playAudio, { once: true });
+
             function swapToScreen(screen) {
                 startMenuScreen.classList.remove('active');
                 instructionsScreen.classList.remove('active');
@@ -410,23 +515,37 @@
                 gameOverScreen.classList.remove('active');
                 screen.classList.add('active');
 
-                hud.style.display = screen === gameScreen ? 'block' : 'none';
+                const gameControls = document.getElementById('game-controls');
+                const hud = document.getElementById('hud');
+
+                if (screen.id === 'game-screen') {
+                    hud.style.display = 'block';
+                    gameControls.style.display = 'flex'; // Ensure game controls are visible
+                } else {
+                    hud.style.display = 'none';
+                    gameControls.style.display = 'none'; // Hide game controls on other screens
+                }
             }
 
             playButton.addEventListener('click', () => {
-                swapToScreen(gameScreen);
-
-                // Start background music when the user clicks "Play"
-                gameBgm.volume = 0.5; // Adjust volume as needed
-                gameBgm.play().catch(error => {
-                    console.error('Failed to play background music:', error);
-                });
-            });
 
             instructionsButton.addEventListener('click', () => swapToScreen(instructionsScreen));
             instructionsBackButton.addEventListener('click', () => swapToScreen(startMenuScreen));
-            playAgainButton.addEventListener('click', () => swapToScreen(gameScreen));
+            playAgainButton.addEventListener('click', () => {
+                resetGame();
+                swapToScreen(gameScreen);
+            });
             mainMenuButton.addEventListener('click', () => swapToScreen(startMenuScreen));
+
+            gameMenuButton.addEventListener('click', () => swapToScreen(startMenuScreen));
+            gameRestartButton.addEventListener('click', resetGame);
+            gameInstructionsButton.addEventListener('click', () => {
+                swapToScreen(instructionsScreen);
+                instructionsBackButton.addEventListener('click', () => swapToScreen(gameScreen), { once: true });
+            });
+
+            // Initialize the game by showing the start menu
+            swapToScreen(document.getElementById('start-menu-screen'));
 
             createMaze();
         });
