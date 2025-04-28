@@ -7,9 +7,11 @@ import json
 import litellm
 from datetime import datetime
 
-sys.path.append(os.path.abspath("../../../"))
+sys.path.append(os.path.abspath("./"))
 
-from crew.GameVersionV1 import GameVersionV1
+os.environ["OPENAI_API_KEY"] = "API_KEY"
+
+from src.game_version_v1.crew.GameVersionV1 import GameVersionV1
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
