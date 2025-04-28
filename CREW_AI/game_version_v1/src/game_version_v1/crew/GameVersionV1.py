@@ -1,5 +1,11 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
+import sys
+import os
+
+sys.path.append(os.path.abspath("./"))
+
+from src.game_version_v1.tools.image_generation_tool import ImageGenerationTool 
 
 @CrewBase
 class GameVersionV1():
@@ -48,6 +54,23 @@ class GameVersionV1():
             verbose=False
         )
 
+    @agent
+    def image_asset_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["image_asset_agent"],
+            model=self.agents_config["image_asset_agent"]["model"],
+            tools=[ImageGenerationTool()],
+            verbose=False
+        )
+
+    @agent
+    def asset_integration_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["asset_integration_agent"],
+            model=self.agents_config["asset_integration_agent"]["model"],
+            verbose=False
+        )
+
     @task
     def generate_game_logic(self) -> Task:
         return Task(
@@ -64,6 +87,18 @@ class GameVersionV1():
     def handle_input_controls(self) -> Task:
         return Task(
             config=self.tasks_config["handle_input_controls"],
+        )
+
+    @task
+    def generate_visual_assets(self) -> Task:
+        return Task(
+            config=self.tasks_config["generate_visual_assets"],
+        )
+
+    @task
+    def integrate_assets(self) -> Task:
+        return Task(
+            config=self.tasks_config["integrate_assets"],
         )
     
     @task
