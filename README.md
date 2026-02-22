@@ -1,4 +1,4 @@
-# AI for Visual Computing — Automated Game Generation Pipeline
+Automated Code Generation Pipeline
 
 **From template to playable HTML5 maze game in one run.** This repository delivers an end-to-end **multi-agent AI pipeline** that automates game design, logic, UI/UX, asset generation, integration, and QA—emphasizing **performance**, **resilience**, and **reproducible automation** for AI-driven content creation.
 
